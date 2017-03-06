@@ -6,8 +6,10 @@ import android.graphics.drawable.Drawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -30,7 +32,7 @@ public class GameActivity extends AppCompatActivity {
 
         LinearLayout linBoardGame = (LinearLayout) findViewById(R.id.boardLayout);
 
-        int sizeOfCell = Math.round(ScreenWidth()/(maxN+1));
+        int sizeOfCell = Math.round(ScreenWidth()/(maxN+(1)));
         LinearLayout.LayoutParams lpRow = new LinearLayout.LayoutParams(sizeOfCell*maxN, sizeOfCell);
         LinearLayout.LayoutParams lpCell = new LinearLayout.LayoutParams(sizeOfCell, sizeOfCell);
 
@@ -47,11 +49,11 @@ public class GameActivity extends AppCompatActivity {
 
     }
     private float ScreenWidth(){
-        Resources resources = context.getResources();
-        DisplayMetrics dm = resources.getDisplayMetrics();
+        RelativeLayout linBoardGame = (RelativeLayout) findViewById(R.id.activity_game);
+        Resources r = linBoardGame.getResources();
+        DisplayMetrics d = r.getDisplayMetrics();
 
-
-        return dm.widthPixels;
+        return d.widthPixels;
     }
     private void loadResources(){
         drawCell[0] = R.drawable.blank;
