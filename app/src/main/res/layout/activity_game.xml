@@ -31,11 +31,9 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/boardLayout"
         android:gravity="bottom|center_horizontal"
-        android:layout_marginTop="95dp"
-        android:layout_below="@+id/imageView"
-        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
         />
 </RelativeLayout>
