@@ -33,18 +33,24 @@ public class GridBoard extends Activity implements OnTouchListener {
     LinearLayout linBoardGame, linRow, searchRow;
     ImageView searchView;
     public Vibrator vb;
+    public int boardID;
 
-    public GridBoard(Context context){
+    public GridBoard(Context context, int bID){
         super();
         this.context = context;
+        boardID = bID;
     }
 
 
     public void setBoard(){
-        linBoardGame = (LinearLayout) ((Activity)context).findViewById(R.id.boardLayout);
+        linBoardGame = (LinearLayout) ((Activity)context).findViewById(boardID);
         linBoardGame.setOnTouchListener(this);
+        RelativeLayout.LayoutParams marginParam = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         vb =  (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         int sizeOfCell = Math.round(ScreenWidth() / (maxN + (1)));
+        marginParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        marginParam.setMargins(0,0,0,(Math.round(sizeOfCell*3)/2));
+        linBoardGame.setLayoutParams(marginParam);
         LinearLayout.LayoutParams lpRow = new LinearLayout.LayoutParams(sizeOfCell * maxN, sizeOfCell);
         LinearLayout.LayoutParams lpCell = new LinearLayout.LayoutParams(sizeOfCell, sizeOfCell);
 
@@ -57,6 +63,7 @@ public class GridBoard extends Activity implements OnTouchListener {
             }
             linBoardGame.addView(linRow, lpRow);
         }
+
 
     }
 
@@ -115,10 +122,8 @@ public class GridBoard extends Activity implements OnTouchListener {
     }
 
 
-    public void hideGrid(){
-        linBoardGame.setVisibility(View.GONE);
+    public void hideGrid(){linBoardGame.setVisibility(View.GONE);}
 
-    }
     public void showGrid(){
         linBoardGame.setVisibility(View.VISIBLE);
     }
