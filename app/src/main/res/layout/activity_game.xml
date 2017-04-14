@@ -10,7 +10,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.danielchoi.ternionfinal.GameActivity"
-    android:background="@drawable/terrain" >
+    android:background="@transition/backgroundchange" >
 
     <ImageButton
         android:layout_width="wrap_content"
@@ -20,22 +20,27 @@
         android:layout_alignParentEnd="true"
         android:id="@+id/imageButton" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:srcCompat="@mipmap/ic_launcher"
-        android:id="@+id/imageView"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true" />
-
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/boardLayout"
+        android:layout_height="wrap_content"
+        android:id="@+id/playerGrid"
         android:gravity="bottom|center_horizontal"
-        android:layout_marginTop="95dp"
-        android:layout_below="@+id/imageView"
-        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
         />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/enemyGrid"
+        android:gravity="bottom|center_horizontal"
+        android:layout_alignParentBottom="true"
+        />
+
+    <ImageButton
+        android:id="@+id/imageButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@android:drawable/btn_star"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>
