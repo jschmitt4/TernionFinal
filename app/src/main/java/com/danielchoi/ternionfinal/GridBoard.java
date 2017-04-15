@@ -4,11 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
-import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -25,15 +22,15 @@ import android.widget.RelativeLayout;
 public class GridBoard extends Activity implements OnTouchListener {
 
 
-    final static int maxN = 10;
-    private ImageView[][] ivCell = new ImageView[maxN][maxN];
+    final static int maxN = 12;
+    private View[][] ivCell = new View[maxN][maxN];
     int white = Color.parseColor("#FFFFFF");
     View temp;
     Context context;
     LinearLayout linBoardGame, linRow, searchRow;
-    ImageView searchView;
+    View searchView;
     public Vibrator vb;
-    public int boardID;
+    public int boardID, sizeOfCell;
 
     public GridBoard(Context context, int bID){
         super();
@@ -47,8 +44,9 @@ public class GridBoard extends Activity implements OnTouchListener {
         linBoardGame.setOnTouchListener(this);
         RelativeLayout.LayoutParams marginParam = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         vb =  (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-        int sizeOfCell = Math.round(ScreenWidth() / (maxN + (1)));
+        sizeOfCell = Math.round(ScreenWidth() / (maxN + (1)));
         marginParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        marginParam.addRule(RelativeLayout.CENTER_HORIZONTAL);
         marginParam.setMargins(0,0,0,(Math.round(sizeOfCell*3)/2));
         linBoardGame.setLayoutParams(marginParam);
         LinearLayout.LayoutParams lpRow = new LinearLayout.LayoutParams(sizeOfCell * maxN, sizeOfCell);
@@ -57,13 +55,14 @@ public class GridBoard extends Activity implements OnTouchListener {
         for (int x = 0; x < maxN; x++) {
             linRow = new LinearLayout(context);
             for (int y = 0; y < maxN; y++) {
-                ivCell[x][y] = new ImageView(context);
+                ivCell[x][y] = new View(context);
                 ivCell[x][y].setBackgroundResource(R.drawable.grid);
                 linRow.addView(ivCell[x][y], lpCell);
             }
             linBoardGame.addView(linRow, lpRow);
         }
 
+        setDefaultShips();
 
     }
 
@@ -84,14 +83,14 @@ public class GridBoard extends Activity implements OnTouchListener {
         switch (motionEvent.getAction()){
             case MotionEvent.ACTION_DOWN:
                 if(temp != null)temp.setBackgroundResource(R.drawable.grid);
-                View down = findView(x, y);
+                View down = findViewHelper(x, y);
                 if(down != null){
                     down.setBackgroundColor(white);
                     temp = down;}
                 break;
             case MotionEvent.ACTION_MOVE:
                 temp.setBackgroundResource(R.drawable.grid);
-                View move = findView(x, y);
+                View move = findViewHelper(x, y);
                 if(move != null && move!= temp)vb.vibrate(1);
                 if(move != null) {
                     move.setBackgroundColor(white);
@@ -106,12 +105,12 @@ public class GridBoard extends Activity implements OnTouchListener {
     }
 
     @Nullable
-    private View findView(int x, int y) {
+    private View findViewHelper(int x, int y) {
         for (int i = 0; i < maxN; i++) {
             searchRow = (LinearLayout) linBoardGame.getChildAt(i);
             if (y > searchRow.getTop() && y < searchRow.getBottom()) {
                 for (int j = 0; j < maxN; j++) {
-                    searchView = (ImageView) searchRow.getChildAt(j);
+                    searchView = searchRow.getChildAt(j);
                     if (x > searchView.getLeft() && x < searchView.getRight()) {
                         return searchView;
                     }//if
@@ -121,6 +120,19 @@ public class GridBoard extends Activity implements OnTouchListener {
         return null;
     }
 
+    private void setDefaultShips(){
+        //Still working on getting this to work.
+
+        ImageView ship = new ImageView(context);
+        RelativeLayout rl = (RelativeLayout) ((Activity)context).findViewById(R.id.activity_game);
+        rl.addView(ship);
+        ship.setImageResource(R.drawable.alien_onebyone);
+        ship.setX(ivCell[9][9].getX());
+        ship.setY(ivCell[1][1].getY());
+        ship.getLayoutParams().height = sizeOfCell;
+        ship.getLayoutParams().width = sizeOfCell;
+
+    }
 
     public void hideGrid(){linBoardGame.setVisibility(View.GONE);}
 
