@@ -33,6 +33,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         ImageButton ib = (ImageButton) findViewById(R.id.imageButton2);
         transition = (TransitionDrawable) findViewById(R.id.activity_game).getBackground();
         ib.setOnClickListener(this);
+
+        // Create Ships;
+        Ship testShip = new Ship();
+        testShip.setShipName("onebyone");
+        testShip.setShipSize(1);
+        testShip.setShipLocation(new int[]{4, 4});
+        Log.i("Ship Log ", testShip.toString());
+
     }
 
     @Override
