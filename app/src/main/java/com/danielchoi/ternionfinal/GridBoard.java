@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 public class GridBoard extends Activity implements OnTouchListener {
 
     final static int maxN = 10;
-    private View[][] ivCell = new View[maxN][maxN];
+    private ImageView[][] ivCell = new ImageView[maxN][maxN];
     int white = Color.parseColor("#FFFFFF");
     private View temp, touchingView;
     private Context context;
@@ -79,7 +80,7 @@ public class GridBoard extends Activity implements OnTouchListener {
         for (int x = 0; x < maxN; x++) {
             linRow = new LinearLayout(context);
             for (int y = 0; y < maxN; y++) {
-                ivCell[x][y] = new View(context);
+                ivCell[x][y] = new ImageView(context);
                 ivCell[x][y].setBackgroundResource(R.drawable.grid);
                 linRow.addView(ivCell[x][y], lpCell);
             }
