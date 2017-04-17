@@ -25,6 +25,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     public boolean playerGridShow = false;
     TransitionDrawable transition;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +51,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         if(view.getId()==R.id.imageButton2){
             if(playerGrid == null){
                 playerGrid = new GridBoard(this, R.id.playerGrid);
-                playerGrid.setBoard();
                 playerGridShow = true;
             }else {
                 if (playerGridShow) {
