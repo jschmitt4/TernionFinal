@@ -14,6 +14,7 @@ import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -26,16 +27,17 @@ public class GridBoard extends Activity implements OnTouchListener {
     final static int maxN = 10;
     private ImageView[][] ivCell = new ImageView[maxN][maxN];
     int white = Color.parseColor("#FFFFFF");
-    private View temp, touchingView;
+    private View temp,temp2, touchingView;
     private Context context;
     private ArrayList<ShipsCanvas> ships;
-    private RelativeLayout homeLayout;
+    private RelativeLayout gridContainer;
     private LinearLayout linBoardGame, linRow, searchRow;
     private View searchView;
+    private boolean atBottom = false;
     public Vibrator vb;
-    private int boardID, sizeOfCell;
+    private int boardID, sizeOfCell, prevShipSize, margin, rowNum, columnNum;
     private int alienShipsId[]={
-            R.drawable.mushroom,       R.drawable.crater,
+            //R.drawable.mushroom,       R.drawable.crater,
             R.drawable.alien_onebyone, R.drawable.alien_onebytwo,
             R.drawable.alien_twobytwo, R.drawable.alien_threebyfour,};
 
@@ -45,7 +47,6 @@ public class GridBoard extends Activity implements OnTouchListener {
         boardID = bID;
         setVariables();
         setBoard();
-        setDefaultShips();
     }
 
     /**
@@ -53,11 +54,13 @@ public class GridBoard extends Activity implements OnTouchListener {
      */
     private void setVariables(){
         vb =  (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-
         linBoardGame = (LinearLayout) ((Activity)context).findViewById(boardID);
+        gridContainer = (RelativeLayout) ((Activity)context).findViewById(R.id.gridContainer);
+        gridContainer.setOnTouchListener(this);
         linBoardGame.setOnTouchListener(this);
         sizeOfCell = Math.round(ScreenWidth() / (maxN + (1)));
-        ships = new ArrayList< >();
+        ships = new ArrayList<>();
+        prevShipSize = 0;
     }
 
     /**
@@ -67,12 +70,12 @@ public class GridBoard extends Activity implements OnTouchListener {
      * Sets the default background image to a grid.
      */
     public void setBoard(){
+        margin = Math.round((sizeOfCell*3)/2);
         RelativeLayout.LayoutParams marginParam = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         marginParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         marginParam.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        marginParam.setMargins(0,0,0,(Math.round(sizeOfCell*3)/2));
-        linBoardGame.setLayoutParams(marginParam);
-        homeLayout = (RelativeLayout)((Activity)context).findViewById(R.id.activity_game);
+        marginParam.setMargins(0,0,0,(margin));
+        gridContainer.setLayoutParams(marginParam);
 
         LinearLayout.LayoutParams lpRow = new LinearLayout.LayoutParams(sizeOfCell * maxN, sizeOfCell);
         LinearLayout.LayoutParams lpCell = new LinearLayout.LayoutParams(sizeOfCell, sizeOfCell);
@@ -85,22 +88,38 @@ public class GridBoard extends Activity implements OnTouchListener {
                 linRow.addView(ivCell[x][y], lpCell);
             }
             linBoardGame.addView(linRow, lpRow);
+
         }
     }
 
-    private void setDefaultShips(){
-        //Still working on getting this to work.
-        for(int i = 0; i <alienShipsId.length; i++){
+    private void createShips(){
+        /**
+        for (int i = 0; i < alienShipsId.length; i++) {
             ShipsCanvas shipsCanvas = new ShipsCanvas(context, sizeOfCell, alienShipsId[i]);
+            gridContainer.addView(shipsCanvas);
             ships.add(shipsCanvas);
-            //ships.get(i).setOnClickListener((View.OnClickListener) context);
-            homeLayout.addView(ships.get(i));
-            ships.get(i).setX(125*i);//Actual Coordniates would go here
-            ships.get(i).setY(175*i);
+        }//for
+        */
+    }
 
+    private void setDefaultShips(){
 
-            Log.i("Ships ID: ", ""+ships.get(i).getX());
-            }
+        for(int j = 0; j < ships.size(); j++){
+
+            View v = ivCell[j][j];
+            int x = Math.round(v.getX());
+            View v2 = (View)ivCell[j][j].getParent();
+            int y = Math.round(v2.getY());
+            ships.get(j).setX(x);
+            ships.get(j).setY(y);
+
+            Log.i("Ship Number:", "" + j);
+            Log.i("X", "" + x);
+            Log.i("Y", "" + y);
+
+            prevShipSize = ships.get(j).getWidthGridCount()-1;
+        }
+
 
     }
 
@@ -114,43 +133,81 @@ public class GridBoard extends Activity implements OnTouchListener {
         DisplayMetrics d = r.getDisplayMetrics();
         return d.widthPixels;
     }
+    private float ScreenHeight() {
+        RelativeLayout linBoardGame = (RelativeLayout) ((Activity)context).findViewById(R.id.activity_game);
+        Resources r = linBoardGame.getResources();
+        DisplayMetrics d = r.getDisplayMetrics();
+        return d.heightPixels;
+    }
+
 
     /**
      * This is a temp animation to follow finger movements
      * Might not need this in main game functionality.
      * Game visual feature
      * It calls findViewHelper
+     * The temp & temp2 variable are holding previous location to revert back to grid.
      * @param view
      * @param motionEvent
      * @return true
      */
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        int x = Math.round(motionEvent.getX());
-        int y = Math.round(motionEvent.getY());
-        Log.i("ONTOUCH", "ACTION_DOWN");
-        Log.i("X: ", "" + x);
-        Log.i("Y: ", "" + y);
+        if(view == linBoardGame) {
+            /**
+            if (!defaultSet) {
+                createShips();
+                setDefaultShips();
+            }
+             */
+            int x = Math.round(motionEvent.getX());
+            int y = Math.round(motionEvent.getY());
+            Log.i("GRID", "Coordinates");
+            Log.i("X: ", "" + x);
+            Log.i("Y: ", "" + y);
 
-        switch (motionEvent.getAction()){
-            case MotionEvent.ACTION_DOWN:
-                if(temp != null)temp.setBackgroundResource(R.drawable.grid);
-                touchingView = findViewHelper(x, y);
-                if(touchingView != null){
-                    touchingView .setBackgroundColor(white);
-                    temp = touchingView ;}
-                break;
-            case MotionEvent.ACTION_MOVE:
-                temp.setBackgroundResource(R.drawable.grid);
-                touchingView  = findViewHelper(x, y);
-                if(touchingView  != null && touchingView != temp)vb.vibrate(1);
-                if(touchingView  != null) {
-                    touchingView .setBackgroundColor(white);
-                    temp = touchingView ;}
-                break;
-            case MotionEvent.ACTION_UP:
-                //This is where we would place our figures!
-                break;
+            switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    if(temp != null) {
+                        temp.setBackgroundResource(R.drawable.grid);
+                        if(temp2 != null){
+                            temp2.setBackgroundResource(R.drawable.grid);
+                        }
+                    }
+                    touchingView = findViewHelper(x, y);
+                    if (touchingView != null) {
+                        //touchingView.setBackgroundColor(white);
+                        setSurroundingViews(R.drawable.alien_onebytwo_top);
+                        touchingView.setBackgroundResource(R.drawable.alien_onebytwo_top);
+                        temp = touchingView;
+                    }
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    temp.setBackgroundResource(R.drawable.grid);
+                    if(temp2 != null){temp2.setBackgroundResource(R.drawable.grid);}
+                    touchingView = findViewHelper(x, y);
+                    if (touchingView != null) {
+                        setSurroundingViews(R.drawable.alien_onebytwo_top);
+                        touchingView.setBackgroundResource(R.drawable.alien_onebytwo_top);
+                        if (touchingView != temp && !atBottom) vb.vibrate(1);
+                        temp = touchingView;
+                    }else if (touchingView == null){
+                        setSurroundingViews(R.drawable.alien_onebytwo_top);
+                        temp.setBackgroundResource(R.drawable.alien_onebytwo_top);
+                    }
+
+                    break;
+                case MotionEvent.ACTION_UP:
+                    //This is where we would place our figures!
+                    break;
+            }
+        }else{
+            int x = Math.round(motionEvent.getX());
+            int y = Math.round(motionEvent.getY());
+            Log.i("CONTAINER", "COORDINATES");
+            Log.i("X: ", "" + x);
+            Log.i("Y: ", "" + y);
+
         }
         return true;
     }
@@ -171,6 +228,10 @@ public class GridBoard extends Activity implements OnTouchListener {
                 for (int j = 0; j < maxN; j++) {
                     searchView = searchRow.getChildAt(j); //Current View of the current searchRow
                     if (x > searchView.getLeft() && x < searchView.getRight()) {//If the x coordinates are within the view, View found!
+                        rowNum = i;
+                        columnNum = j;
+                        if(searchView == ivCell[i][j])Log.i("ROW to CELL", "MATCH!");
+                        else Log.i("ROW to CELL", "MisMatch!");
                         return searchView;
                     }//if
                 }//for search View
@@ -179,15 +240,39 @@ public class GridBoard extends Activity implements OnTouchListener {
         return null;
     }
 
-
     /**
-     * Hides the grid
+     * This currently receives the id from onTouch to create the bottom view.
+     * temp hard code.
+     * @param id
      */
+    private void setSurroundingViews(int id){
+        if (id == R.drawable.alien_onebytwo_top) {
+            searchRow = (LinearLayout)  linBoardGame.getChildAt(rowNum+1);
+            if(searchRow != null) {
+                searchView = searchRow.getChildAt(columnNum);
+                searchView.setBackgroundResource(R.drawable.alien_onebytwo_bottom);
+                temp2 = searchView;
+                atBottom = false;
+            }else{
+                searchRow = (LinearLayout)  linBoardGame.getChildAt(rowNum);
+                searchView = searchRow.getChildAt(columnNum);
+                temp2 = searchView;
+                temp2.setBackgroundResource(R.drawable.alien_onebytwo_bottom);
+                searchRow = (LinearLayout)  linBoardGame.getChildAt(rowNum-1);
+                searchView = searchRow.getChildAt(columnNum);
+                touchingView = searchView;
+                atBottom = true;
+            }
+        }
+        else{
+            Toast.makeText(context, "False" + Toast.LENGTH_SHORT, Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
+
+
     public void hideGrid(){linBoardGame.setVisibility(View.GONE);}
-
-    /**
-     * Shows the grid
-     */
     public void showGrid(){
         linBoardGame.setVisibility(View.VISIBLE);
     }

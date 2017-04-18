@@ -14,17 +14,18 @@ import java.util.ArrayList;
 
 public class ShipsCanvas extends View {
     private Bitmap shipBitmap;
-    private int gridSize, shipId;
+    private int gridSize, width, height, widthGridCount, heightGridCount;
 
 
     public ShipsCanvas(Context context, int size, int shipId) {
         super(context);
         gridSize = size;
-        this.shipId = shipId;
         shipBitmap = BitmapFactory.decodeResource(getResources(), shipId);
-        createScaledBitmap();
-
+        setGridCounts(shipId);
+        setDimensions(widthGridCount, heightGridCount);
+        shipBitmap = Bitmap.createScaledBitmap(shipBitmap, width, height, true);
     }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -33,21 +34,29 @@ public class ShipsCanvas extends View {
         }
 
     }
-
-    /**
-     * This converts all the drawables to bitmaps to the proper size in relation to the screen.
-     * Then adds them to the bitmapList
-     */
-    private void createScaledBitmap(){
-        if(shipBitmap != null)
-            if(shipId == R.drawable.alien_onebytwo) {
-                shipBitmap = Bitmap.createScaledBitmap(shipBitmap, gridSize, gridSize*2, true);
-            }else if(shipId == R.drawable.alien_twobytwo) {
-                shipBitmap = Bitmap.createScaledBitmap(shipBitmap, gridSize*2, gridSize*2, true);
-            }else if(shipId == R.drawable.alien_threebyfour) {
-                shipBitmap = Bitmap.createScaledBitmap(shipBitmap, gridSize*3, gridSize*4, true);
-            }else{
-                shipBitmap = Bitmap.createScaledBitmap(shipBitmap, gridSize, gridSize, true);
-            }
+    private void setGridCounts(int id){
+        if(id == R.drawable.alien_onebytwo) {
+            widthGridCount = 1;
+            heightGridCount = 2;
+        }else if(id  == R.drawable.alien_twobytwo) {
+            widthGridCount = 2;
+            heightGridCount = 2;
+        }else if(id  == R.drawable.alien_threebyfour) {
+            widthGridCount = 3;
+            heightGridCount = 4;
+        }else{
+            widthGridCount = 1;
+            heightGridCount = 1;
+        }
     }
+
+    private void setDimensions(int wC, int hC){
+        width  = gridSize * wC;
+        height = gridSize * hC;
+    }
+
+    public int getShipWidth() {return width;}
+    public int getShipHeight() {return height;}
+    public int getWidthGridCount() {return widthGridCount;}
+    public int getHeightGridCount() {return heightGridCount;}
 }

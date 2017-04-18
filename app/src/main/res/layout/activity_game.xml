@@ -20,22 +20,30 @@
         android:layout_alignParentEnd="true"
         android:id="@+id/imageButton" />
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
+    <RelativeLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/playerGrid"
-        android:gravity="bottom|center_horizontal"
-        android:layout_alignParentBottom="true"
-        />
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/enemyGrid"
-        android:gravity="bottom|center_horizontal"
-        android:layout_alignParentBottom="true"
-        />
+        android:id="@+id/gridContainer"
+        android:layout_alignParentBottom="true">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/playerGrid"
+            android:gravity="bottom|center_horizontal"
+            android:layout_alignParentBottom="true"
+            />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/enemyGrid"
+            android:gravity="bottom|center_horizontal"
+            android:layout_alignParentBottom="true"
+            />
+    </RelativeLayout>
+
 
     <ImageButton
         android:id="@+id/imageButton2"
@@ -43,4 +51,6 @@
         android:layout_height="wrap_content"
         app:srcCompat="@android:drawable/btn_star"
         android:layout_centerHorizontal="true" />
+
+
 </RelativeLayout>
