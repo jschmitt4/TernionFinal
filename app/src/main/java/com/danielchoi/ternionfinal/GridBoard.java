@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
@@ -12,7 +11,6 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -77,7 +75,6 @@ public class GridBoard extends Activity implements OnTouchListener {
         marginParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         marginParam.addRule(RelativeLayout.CENTER_HORIZONTAL);
         marginParam.setMargins(0,0,0,(margin));
-        //linBoardGame.setLayoutParams(marginParam);
         gridContainer.setLayoutParams(marginParam);
 
         LinearLayout.LayoutParams lpRow = new LinearLayout.LayoutParams(sizeOfCell * maxN, sizeOfCell);
@@ -149,6 +146,7 @@ public class GridBoard extends Activity implements OnTouchListener {
      * Might not need this in main game functionality.
      * Game visual feature
      * It calls findViewHelper
+     * The temp & temp2 variable are holding previous location to revert back to grid.
      * @param view
      * @param motionEvent
      * @return true
@@ -176,7 +174,6 @@ public class GridBoard extends Activity implements OnTouchListener {
                             temp2.setBackgroundResource(R.drawable.grid);
                         }
                     }
-
                     touchingView = findViewHelper(x, y);
                     if (touchingView != null) {
                         //touchingView.setBackgroundColor(white);
@@ -233,6 +230,8 @@ public class GridBoard extends Activity implements OnTouchListener {
                     if (x > searchView.getLeft() && x < searchView.getRight()) {//If the x coordinates are within the view, View found!
                         rowNum = i;
                         columnNum = j;
+                        if(searchView == ivCell[i][j])Log.i("ROW to CELL", "MATCH!");
+                        else Log.i("ROW to CELL", "MisMatch!");
                         return searchView;
                     }//if
                 }//for search View
@@ -241,6 +240,11 @@ public class GridBoard extends Activity implements OnTouchListener {
         return null;
     }
 
+    /**
+     * This currently receives the id from onTouch to create the bottom view.
+     * temp hard code.
+     * @param id
+     */
     private void setSurroundingViews(int id){
         if (id == R.drawable.alien_onebytwo_top) {
             searchRow = (LinearLayout)  linBoardGame.getChildAt(rowNum+1);
