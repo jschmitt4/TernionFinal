@@ -25,21 +25,17 @@ import java.util.ArrayList;
 public class GridBoard extends Activity implements OnTouchListener {
 
     final static int maxN = 10;
+    int score = 0; // Player score adds 200 points for each hit.
     private ImageView[][] ivCell = new ImageView[maxN][maxN];
     int white = Color.parseColor("#FFFFFF");
     private View temp,temp2, touchingView;
     private Context context;
-    private ArrayList<ShipsCanvas> ships;
     private RelativeLayout gridContainer;
     private LinearLayout linBoardGame, linRow, searchRow;
     private View searchView;
     private boolean atBottom = false;
     public Vibrator vb;
     private int boardID, sizeOfCell, prevShipSize, margin, rowNum, columnNum;
-    private int alienShipsId[]={
-            //R.drawable.mushroom,       R.drawable.crater,
-            R.drawable.alien_onebyone, R.drawable.alien_onebytwo,
-            R.drawable.alien_twobytwo, R.drawable.alien_threebyfour,};
 
     public GridBoard(Context context, int bID){
         super();
@@ -59,7 +55,6 @@ public class GridBoard extends Activity implements OnTouchListener {
         gridContainer.setOnTouchListener(this);
         linBoardGame.setOnTouchListener(this);
         sizeOfCell = Math.round(ScreenWidth() / (maxN + (1)));
-        ships = new ArrayList<>();
         prevShipSize = 0;
     }
 
@@ -93,34 +88,9 @@ public class GridBoard extends Activity implements OnTouchListener {
     }
 
     private void createShips(){
-        /**
-        for (int i = 0; i < alienShipsId.length; i++) {
-            ShipsCanvas shipsCanvas = new ShipsCanvas(context, sizeOfCell, alienShipsId[i]);
-            gridContainer.addView(shipsCanvas);
-            ships.add(shipsCanvas);
-        }//for
-        */
     }
 
     private void setDefaultShips(){
-
-        for(int j = 0; j < ships.size(); j++){
-
-            View v = ivCell[j][j];
-            int x = Math.round(v.getX());
-            View v2 = (View)ivCell[j][j].getParent();
-            int y = Math.round(v2.getY());
-            ships.get(j).setX(x);
-            ships.get(j).setY(y);
-
-            Log.i("Ship Number:", "" + j);
-            Log.i("X", "" + x);
-            Log.i("Y", "" + y);
-
-            prevShipSize = ships.get(j).getWidthGridCount()-1;
-        }
-
-
     }
 
     /**
@@ -165,6 +135,7 @@ public class GridBoard extends Activity implements OnTouchListener {
             Log.i("GRID", "Coordinates");
             Log.i("X: ", "" + x);
             Log.i("Y: ", "" + y);
+
 
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
@@ -211,7 +182,10 @@ public class GridBoard extends Activity implements OnTouchListener {
         }
         return true;
     }
-
+    private boolean checkGridCell(){
+        // Test Hitting / Scoring Function
+        return true;
+    }
     /**
      * A nested for loop that scans each cell in the row to find which view is being touched
      * Takes in the x & y coordinates that was touched
@@ -230,7 +204,15 @@ public class GridBoard extends Activity implements OnTouchListener {
                     if (x > searchView.getLeft() && x < searchView.getRight()) {//If the x coordinates are within the view, View found!
                         rowNum = i;
                         columnNum = j;
-                        if(searchView == ivCell[i][j])Log.i("ROW to CELL", "MATCH!");
+                        if(searchView == ivCell[i][j]){
+                            Log.i("ROW to CELL", "MATCH!");
+                            // Test Hitting Function
+                            boolean isOccupied = checkGridCell();
+                            if(isOccupied){
+                                score += 200;
+                                Log.i("Score = ", "" + score);
+                            }
+                        }
                         else Log.i("ROW to CELL", "MisMatch!");
                         return searchView;
                     }//if
