@@ -25,6 +25,7 @@ import java.util.ArrayList;
 public class GridBoard extends Activity implements OnTouchListener {
 
     final static int maxN = 10;
+    int score = 0; // Player score adds 200 points for each hit.
     private ImageView[][] ivCell = new ImageView[maxN][maxN];
     int white = Color.parseColor("#FFFFFF");
     private View temp,temp2, touchingView;
@@ -135,6 +136,7 @@ public class GridBoard extends Activity implements OnTouchListener {
             Log.i("X: ", "" + x);
             Log.i("Y: ", "" + y);
 
+
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     if(temp != null) {
@@ -180,7 +182,10 @@ public class GridBoard extends Activity implements OnTouchListener {
         }
         return true;
     }
-
+    private boolean checkGridCell(){
+        // Test Hitting / Scoring Function
+        return true;
+    }
     /**
      * A nested for loop that scans each cell in the row to find which view is being touched
      * Takes in the x & y coordinates that was touched
@@ -199,7 +204,15 @@ public class GridBoard extends Activity implements OnTouchListener {
                     if (x > searchView.getLeft() && x < searchView.getRight()) {//If the x coordinates are within the view, View found!
                         rowNum = i;
                         columnNum = j;
-                        if(searchView == ivCell[i][j])Log.i("ROW to CELL", "MATCH!");
+                        if(searchView == ivCell[i][j]){
+                            Log.i("ROW to CELL", "MATCH!");
+                            // Test Hitting Function
+                            boolean isOccupied = checkGridCell();
+                            if(isOccupied){
+                                score += 200;
+                                Log.i("Score = ", "" + score);
+                            }
+                        }
                         else Log.i("ROW to CELL", "MisMatch!");
                         return searchView;
                     }//if
