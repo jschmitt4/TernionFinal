@@ -29,17 +29,12 @@ public class GridBoard extends Activity implements OnTouchListener {
     int white = Color.parseColor("#FFFFFF");
     private View temp,temp2, touchingView;
     private Context context;
-    private ArrayList<ShipsCanvas> ships;
     private RelativeLayout gridContainer;
     private LinearLayout linBoardGame, linRow, searchRow;
     private View searchView;
     private boolean atBottom = false;
     public Vibrator vb;
     private int boardID, sizeOfCell, prevShipSize, margin, rowNum, columnNum;
-    private int alienShipsId[]={
-            //R.drawable.mushroom,       R.drawable.crater,
-            R.drawable.alien_onebyone, R.drawable.alien_onebytwo,
-            R.drawable.alien_twobytwo, R.drawable.alien_threebyfour,};
 
     public GridBoard(Context context, int bID){
         super();
@@ -59,7 +54,6 @@ public class GridBoard extends Activity implements OnTouchListener {
         gridContainer.setOnTouchListener(this);
         linBoardGame.setOnTouchListener(this);
         sizeOfCell = Math.round(ScreenWidth() / (maxN + (1)));
-        ships = new ArrayList<>();
         prevShipSize = 0;
     }
 
@@ -93,34 +87,9 @@ public class GridBoard extends Activity implements OnTouchListener {
     }
 
     private void createShips(){
-        /**
-        for (int i = 0; i < alienShipsId.length; i++) {
-            ShipsCanvas shipsCanvas = new ShipsCanvas(context, sizeOfCell, alienShipsId[i]);
-            gridContainer.addView(shipsCanvas);
-            ships.add(shipsCanvas);
-        }//for
-        */
     }
 
     private void setDefaultShips(){
-
-        for(int j = 0; j < ships.size(); j++){
-
-            View v = ivCell[j][j];
-            int x = Math.round(v.getX());
-            View v2 = (View)ivCell[j][j].getParent();
-            int y = Math.round(v2.getY());
-            ships.get(j).setX(x);
-            ships.get(j).setY(y);
-
-            Log.i("Ship Number:", "" + j);
-            Log.i("X", "" + x);
-            Log.i("Y", "" + y);
-
-            prevShipSize = ships.get(j).getWidthGridCount()-1;
-        }
-
-
     }
 
     /**
