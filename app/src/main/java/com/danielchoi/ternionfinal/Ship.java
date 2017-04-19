@@ -12,6 +12,7 @@ public class Ship {
     public String shipName;
     public int shipSize;
     public int[] shipLocation;
+    public int[] shipPieces;
 
     public String getShipName() {
         return shipName;
@@ -37,6 +38,10 @@ public class Ship {
         this.shipLocation = shipLocation;
     }
 
+    public int[] getShipPieces() { return shipPieces; }
+
+    public void setShipPieces(int[] shipPieces) { this.shipPieces = shipPieces; }
+
     @Override
     public String toString() {
         return
@@ -44,6 +49,7 @@ public class Ship {
             "shipName='" + shipName + '\'' +
             ", shipSize=" + shipSize +
             ", shipLocation=" + Arrays.toString(shipLocation) +
+            ", shipPieces=" + Arrays.toString(shipPieces) +
             '}';
     }
 }

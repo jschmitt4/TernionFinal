@@ -36,6 +36,7 @@ public class GridBoard extends Activity implements OnTouchListener {
     private boolean atBottom = false;
     public Vibrator vb;
     private int boardID, sizeOfCell, prevShipSize, margin, rowNum, columnNum;
+    private Ship ship = new Ship();
 
     public GridBoard(Context context, int bID){
         super();
@@ -83,7 +84,6 @@ public class GridBoard extends Activity implements OnTouchListener {
                 linRow.addView(ivCell[x][y], lpCell);
             }
             linBoardGame.addView(linRow, lpRow);
-
         }
     }
 
@@ -132,42 +132,49 @@ public class GridBoard extends Activity implements OnTouchListener {
              */
             int x = Math.round(motionEvent.getX());
             int y = Math.round(motionEvent.getY());
-            Log.i("GRID", "Coordinates");
-            Log.i("X: ", "" + x);
-            Log.i("Y: ", "" + y);
-
 
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    Log.i("GRID", "Coordinates");
+                    Log.i("X: ", "" + x);
+                    Log.i("Y: ", "" + y);
+
+                    // Create Ships;
+                    ship.setShipName("alien_onebyone");
+                    ship.setShipSize(1);
+                    ship.setShipLocation(new int[]{x, y});
+                    ship.setShipPieces(new int[]{R.drawable.alien_onebytwo_top,R.drawable.alien_onebytwo_bottom});
+                    Log.i("Ship Log ", ship.toString());
+
                     if(temp != null) {
                         temp.setBackgroundResource(R.drawable.grid);
                         if(temp2 != null){
                             temp2.setBackgroundResource(R.drawable.grid);
                         }
                     }
-                    touchingView = findViewHelper(x, y);
+                    touchingView = findViewHelper(ship.shipLocation[0], ship.shipLocation[1]);
                     if (touchingView != null) {
                         //touchingView.setBackgroundColor(white);
-                        setSurroundingViews(R.drawable.alien_onebytwo_top);
-                        touchingView.setBackgroundResource(R.drawable.alien_onebytwo_top);
+                        setSurroundingViews(ship.shipPieces[0]);
+                        touchingView.setBackgroundResource(ship.shipPieces[0]);
                         temp = touchingView;
                     }
                     break;
-                case MotionEvent.ACTION_MOVE:
-                    temp.setBackgroundResource(R.drawable.grid);
-                    if(temp2 != null){temp2.setBackgroundResource(R.drawable.grid);}
-                    touchingView = findViewHelper(x, y);
-                    if (touchingView != null) {
-                        setSurroundingViews(R.drawable.alien_onebytwo_top);
-                        touchingView.setBackgroundResource(R.drawable.alien_onebytwo_top);
-                        if (touchingView != temp && !atBottom) vb.vibrate(1);
-                        temp = touchingView;
-                    }else if (touchingView == null){
-                        setSurroundingViews(R.drawable.alien_onebytwo_top);
-                        temp.setBackgroundResource(R.drawable.alien_onebytwo_top);
-                    }
-
-                    break;
+//                case MotionEvent.ACTION_MOVE:
+//                    temp.setBackgroundResource(R.drawable.grid);
+//                    if(temp2 != null){temp2.setBackgroundResource(R.drawable.grid);}
+//                    touchingView = findViewHelper(x, y);
+//                    if (touchingView != null) {
+//                        setSurroundingViews(R.drawable.alien_onebytwo_top);
+//                        touchingView.setBackgroundResource(R.drawable.alien_onebytwo_top);
+//                        if (touchingView != temp && !atBottom) vb.vibrate(1);
+//                        temp = touchingView;
+//                    }else if (touchingView == null){
+//                        setSurroundingViews(R.drawable.alien_onebytwo_top);
+//                        temp.setBackgroundResource(R.drawable.alien_onebytwo_top);
+//                    }
+//
+//                    break;
                 case MotionEvent.ACTION_UP:
                     //This is where we would place our figures!
                     break;
@@ -228,29 +235,26 @@ public class GridBoard extends Activity implements OnTouchListener {
      * @param id
      */
     private void setSurroundingViews(int id){
-        if (id == R.drawable.alien_onebytwo_top) {
+        if (id == ship.shipPieces[0]) {
             searchRow = (LinearLayout)  linBoardGame.getChildAt(rowNum+1);
             if(searchRow != null) {
                 searchView = searchRow.getChildAt(columnNum);
-                searchView.setBackgroundResource(R.drawable.alien_onebytwo_bottom);
+                searchView.setBackgroundResource(ship.shipPieces[1]);
                 temp2 = searchView;
                 atBottom = false;
             }else{
                 searchRow = (LinearLayout)  linBoardGame.getChildAt(rowNum);
                 searchView = searchRow.getChildAt(columnNum);
                 temp2 = searchView;
-                temp2.setBackgroundResource(R.drawable.alien_onebytwo_bottom);
+                temp2.setBackgroundResource(ship.shipPieces[1]);
                 searchRow = (LinearLayout)  linBoardGame.getChildAt(rowNum-1);
                 searchView = searchRow.getChildAt(columnNum);
                 touchingView = searchView;
                 atBottom = true;
             }
-        }
-        else{
+        } else {
             Toast.makeText(context, "False" + Toast.LENGTH_SHORT, Toast.LENGTH_SHORT).show();
         }
-
-
     }
 
 
