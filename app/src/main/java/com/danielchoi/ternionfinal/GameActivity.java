@@ -1,6 +1,7 @@
 package com.danielchoi.ternionfinal;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -20,6 +21,10 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener{
+    // Variables
+    public static final int activityRef = 2000;
+    private int score;
+
     public GridBoard playerGrid, enemyGrid;
     public Vibrator vb;
     public boolean playerGridShow = false;
@@ -46,7 +51,18 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
     }
+    // Set High Scores for this game
+    class SetHighScore implements View.OnClickListener{
 
+        @Override
+        public void onClick(View view) {
+            Intent scoreIntent = new Intent(getApplicationContext(), ScoreActivity.class);
+            scoreIntent.putExtra("score", score);
+            scoreIntent.putExtra("calling-Activity", activityRef);
+            startActivity(scoreIntent);
+
+        }
+    }
     @Override
     public void onClick(View view) {
 //        vb.vibrate(10);
