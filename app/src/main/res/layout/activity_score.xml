@@ -9,7 +9,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.danielchoi.ternionfinal.ScoreActivity"
-    android:background="@transition/backgroundchange">
+    android:background="@drawable/aboutbackground">
 
     <TextView
         android:text="@string/highscore"
