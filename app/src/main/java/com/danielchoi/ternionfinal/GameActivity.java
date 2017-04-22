@@ -54,20 +54,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
     }
-    /* Set High Scores for this game    NOT WORKING ---------
-    class SetHighScore implements View.OnClickListener{
-
-        @Override
-        public void onClick(View view) {
-            Intent scoreIntent = new Intent(getApplicationContext(), ScoreActivity.class);
-            scoreIntent.putExtra("score", score);
-            scoreIntent.putExtra("calling-Activity", activityRef);
-            Log.i("Adding High Score", "----------");
-            startActivity(scoreIntent);
-
-
-        }
-    }*/
     @Override
     public void onClick(View view) {
         vb.vibrate(10);

@@ -197,7 +197,7 @@ public class ScoreActivity extends AppCompatActivity {
      * Called by onCreate()
      */
     private void setTypeface(){
-        Typeface tf = Typeface.createFromAsset(getAssets(),  "fonts/digitaldismay.otf");
+        Typeface tf = Typeface.createFromAsset(getAssets(),  "fonts/britanic.TTF");
         TextView tv = (TextView) findViewById(R.id.highScoreTv);
         tv.setTypeface(tf);
     }

@@ -9,7 +9,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
 
-    android:background="@drawable/about"
+    android:background="@drawable/aboutbackground"
     tools:context="com.danielchoi.ternionfinal.AboutActivity">
 
     <LinearLayout
@@ -98,6 +98,50 @@
             android:layout_marginStart="20dp"
             android:layout_marginBottom="20sp" />
 
+        <TextView
+            android:text="@string/artworkString"
+            android:textColor="#FFFFFF"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:textAlignment="center"
+            android:id="@+id/artWorkTV"
+            android:layout_marginBottom="20sp"
+            android:textSize="40sp"/>
+
+        <TextView
+            android:text="@string/spaceShipString"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spaceShipsTV"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:layout_marginStart="20dp"
+            android:layout_marginBottom="20sp"/>
+
+        <TextView
+            android:text="@string/particlesString"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/particleTV"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:layout_marginStart="20dp"
+            android:layout_marginBottom="20sp" />
+
+        <TextView
+            android:text="@string/layoutsString"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/backgroundTV"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:layout_marginStart="20dp"
+            android:layout_marginBottom="20sp"/>
+        
 
     </LinearLayout>
 
