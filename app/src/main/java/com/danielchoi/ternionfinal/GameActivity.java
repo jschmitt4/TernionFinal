@@ -34,8 +34,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         ImageButton ib = (ImageButton) findViewById(R.id.imageButton2);
         transition = (TransitionDrawable) findViewById(R.id.activity_game).getBackground();
         ib.setOnClickListener(this);
-        playerGrid = new GridBoard(this, R.id.playerGrid);
-        playerGridShow = true;
+
     }
 
     @Override
@@ -49,22 +48,22 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-//        vb.vibrate(10);
-//        if(view.getId()==R.id.imageButton2){
-//            if(playerGrid == null){
-//                playerGrid = new GridBoard(this, R.id.playerGrid);
-//                playerGridShow = true;
-//            }else {
-//                if (playerGridShow) {
-//                    //playerGrid.hideGrid();
-//                    transition.reverseTransition(750);
-//                    playerGridShow = false;
-//                }else if (!playerGridShow) {
-//                    //playerGrid.showGrid();
-//                    transition.reverseTransition(750);
-//                    playerGridShow = true;
-//                }
-//            }
-//        }
+        vb.vibrate(10);
+        if(view.getId()==R.id.imageButton2){
+          if(playerGrid == null){
+                playerGrid = new GridBoard(this, R.id.playerGrid);
+               playerGridShow = true;
+            }else {
+                if (playerGridShow) {
+                    //playerGrid.hideGrid();
+                    transition.reverseTransition(750);
+                    playerGridShow = false;
+                }else if (!playerGridShow) {
+                    //playerGrid.showGrid();
+                    transition.reverseTransition(750);
+                    playerGridShow = true;
+                }
+            }
+        }
  }
 }
