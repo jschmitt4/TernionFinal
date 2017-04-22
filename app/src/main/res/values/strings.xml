@@ -13,7 +13,7 @@
 
     <string name="defaultText">Default</string>
     <string name="congrats">Congrats!</string>
+    <string name="highscore"><u>High Score</u></string>
     <string name ="nameHint">Name</string>
-    <string name ="highscore">High Scores</string>
 
 </resources>

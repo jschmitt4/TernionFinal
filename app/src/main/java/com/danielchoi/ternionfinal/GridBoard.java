@@ -53,7 +53,7 @@ public class GridBoard extends Activity implements OnTouchListener {
         vb =  (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         linBoardGame = (LinearLayout) ((Activity)context).findViewById(boardID);
         gridContainer = (RelativeLayout) ((Activity)context).findViewById(R.id.gridContainer);
-        gridContainer.setOnTouchListener(this);
+        //gridContainer.setOnTouchListener(this);
         linBoardGame.setOnTouchListener(this);
         sizeOfCell = Math.round(ScreenWidth() / (maxN + (1)));
         prevShipSize = 0;
@@ -179,14 +179,14 @@ public class GridBoard extends Activity implements OnTouchListener {
                     //This is where we would place our figures!
                     break;
             }
-        }else{
+        }/*else{          ------------Test High Score
             int x = Math.round(motionEvent.getX());
             int y = Math.round(motionEvent.getY());
             Log.i("CONTAINER", "COORDINATES");
             Log.i("X: ", "" + x);
             Log.i("Y: ", "" + y);
 
-        }
+        }*/
         return true;
     }
     private boolean checkGridCell(){

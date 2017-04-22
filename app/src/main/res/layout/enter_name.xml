@@ -11,7 +11,7 @@
             android:id="@+id/congrats_textView"
             android:textAlignment="center"
             android:textSize="30sp"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:padding="5dp" />
 
         <EditText

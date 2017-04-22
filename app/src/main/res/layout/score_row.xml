@@ -18,20 +18,20 @@
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:id="@+id/placeTv"
-            android:textSize="20sp"
+            android:textSize="30sp"
             android:gravity="center|start"
             android:layout_weight="1"
-            android:textColor="@color/green" />
+            android:textColor="@color/black" />
 
         <TextView
             android:text="@string/defaultText"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:id="@+id/nameTv"
-            android:textSize="20sp"
+            android:textSize="30sp"
             android:gravity="center|start"
             android:layout_marginStart="10dp"
-            android:textColor="@color/red"
+            android:textColor="@color/black"
             android:layout_weight="5"
             />
 
@@ -40,9 +40,9 @@
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:id="@+id/scoreTv"
-            android:textSize="20sp"
+            android:textSize="30sp"
             android:gravity="center|start"
             android:layout_weight="1"
-            android:textColor="@color/blue" />
+            android:textColor="@color/black" />
 
 </LinearLayout>

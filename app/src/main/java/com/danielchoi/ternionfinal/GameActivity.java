@@ -23,7 +23,7 @@ import android.widget.RelativeLayout;
 public class GameActivity extends AppCompatActivity implements View.OnClickListener{
     // Variables
     public static final int activityRef = 2000;
-    private int score;
+    private int score=0, count=0;
 
     public GridBoard playerGrid, enemyGrid;
     public Vibrator vb;
