@@ -41,6 +41,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         ib.setOnClickListener(this);
         playerGrid = new GridBoard(this, R.id.playerGrid);
         playerGridShow = true;
+
+
+        // Test High Score
+        ImageButton ibs = (ImageButton) findViewById(R.id.imageButton);
+        ibs.setOnClickListener(this);
     }
 
     @Override
@@ -51,7 +56,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
     }
-    // Set High Scores for this game
+    /* Set High Scores for this game    NOT WORKING ---------
     class SetHighScore implements View.OnClickListener{
 
         @Override
@@ -59,12 +64,22 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             Intent scoreIntent = new Intent(getApplicationContext(), ScoreActivity.class);
             scoreIntent.putExtra("score", score);
             scoreIntent.putExtra("calling-Activity", activityRef);
+            Log.i("Adding High Score", "----------");
             startActivity(scoreIntent);
 
+
         }
-    }
+    }*/
     @Override
     public void onClick(View view) {
+        Log.i("Test High Score", "-----");
+        if(view.getId() == R.id.imageButton){
+            Intent scoreIntent = new Intent(getApplicationContext(), ScoreActivity.class);
+            scoreIntent.putExtra("score", score);
+            scoreIntent.putExtra("calling-Activity", activityRef);
+            Log.i("Adding High Score", "----------");
+            startActivity(scoreIntent);
+        }
 //        vb.vibrate(10);
 //        if(view.getId()==R.id.imageButton2){
 //            if(playerGrid == null){
