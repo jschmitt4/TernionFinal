@@ -39,13 +39,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         ImageButton ib = (ImageButton) findViewById(R.id.imageButton2);
         transition = (TransitionDrawable) findViewById(R.id.activity_game).getBackground();
         ib.setOnClickListener(this);
-        playerGrid = new GridBoard(this, R.id.playerGrid);
-        playerGridShow = true;
-
-
+      
         // Test High Score
         ImageButton ibs = (ImageButton) findViewById(R.id.imageButton);
         ibs.setOnClickListener(this);
+
     }
 
     @Override
@@ -72,6 +70,8 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     }*/
     @Override
     public void onClick(View view) {
+        vb.vibrate(10);
+      
         Log.i("Test High Score", "-----");
         if(view.getId() == R.id.imageButton){
             Intent scoreIntent = new Intent(getApplicationContext(), ScoreActivity.class);
@@ -79,23 +79,22 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             scoreIntent.putExtra("calling-Activity", activityRef);
             Log.i("Adding High Score", "----------");
             startActivity(scoreIntent);
+        }else if(view.getId()==R.id.imageButton2){
+          if(playerGrid == null){
+                playerGrid = new GridBoard(this, R.id.playerGrid);
+               playerGridShow = true;
+            }else {
+                if (playerGridShow) {
+                    //playerGrid.hideGrid();
+                    transition.reverseTransition(750);
+                    playerGridShow = false;
+                }else if (!playerGridShow) {
+                    //playerGrid.showGrid();
+                    transition.reverseTransition(750);
+                    playerGridShow = true;
+                }
+            }
         }
-//        vb.vibrate(10);
-//        if(view.getId()==R.id.imageButton2){
-//            if(playerGrid == null){
-//                playerGrid = new GridBoard(this, R.id.playerGrid);
-//                playerGridShow = true;
-//            }else {
-//                if (playerGridShow) {
-//                    //playerGrid.hideGrid();
-//                    transition.reverseTransition(750);
-//                    playerGridShow = false;
-//                }else if (!playerGridShow) {
-//                    //playerGrid.showGrid();
-//                    transition.reverseTransition(750);
-//                    playerGridShow = true;
-//                }
-//            }
-//        }
+
  }
 }

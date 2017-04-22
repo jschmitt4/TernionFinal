@@ -42,14 +42,15 @@
             android:gravity="bottom|center_horizontal"
             android:layout_alignParentBottom="true"
             />
+
     </RelativeLayout>
 
     <ImageButton
         android:id="@+id/imageButton2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@android:drawable/btn_star"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        app:srcCompat="@android:drawable/btn_star" />
 
 
 </RelativeLayout>
