@@ -8,4 +8,12 @@
     <string name="johnSchmitt">John Schmitt</string>
     <string name="johnSchmittInfo">Networking\nw/Mobile software technology</string>
     <string name="logoDescription">House Logo</string>
+
+
+
+    <string name="defaultText">Default</string>
+    <string name="congrats">Congrats!</string>
+    <string name="highscore"><u>High Score</u></string>
+    <string name ="nameHint">Name</string>
+
 </resources>

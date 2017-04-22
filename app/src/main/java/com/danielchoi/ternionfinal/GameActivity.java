@@ -1,6 +1,7 @@
 package com.danielchoi.ternionfinal;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -20,6 +21,10 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener{
+    // Variables
+    public static final int activityRef = 2000;
+    private int score=0, count=0;
+
     public GridBoard playerGrid, enemyGrid;
     public Vibrator vb;
     public boolean playerGridShow = false;
@@ -34,6 +39,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         ImageButton ib = (ImageButton) findViewById(R.id.imageButton2);
         transition = (TransitionDrawable) findViewById(R.id.activity_game).getBackground();
         ib.setOnClickListener(this);
+      
+        // Test High Score
+        ImageButton ibs = (ImageButton) findViewById(R.id.imageButton);
+        ibs.setOnClickListener(this);
 
     }
 
@@ -45,11 +54,32 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
     }
+    /* Set High Scores for this game    NOT WORKING ---------
+    class SetHighScore implements View.OnClickListener{
 
+        @Override
+        public void onClick(View view) {
+            Intent scoreIntent = new Intent(getApplicationContext(), ScoreActivity.class);
+            scoreIntent.putExtra("score", score);
+            scoreIntent.putExtra("calling-Activity", activityRef);
+            Log.i("Adding High Score", "----------");
+            startActivity(scoreIntent);
+
+
+        }
+    }*/
     @Override
     public void onClick(View view) {
         vb.vibrate(10);
-        if(view.getId()==R.id.imageButton2){
+      
+        Log.i("Test High Score", "-----");
+        if(view.getId() == R.id.imageButton){
+            Intent scoreIntent = new Intent(getApplicationContext(), ScoreActivity.class);
+            scoreIntent.putExtra("score", score);
+            scoreIntent.putExtra("calling-Activity", activityRef);
+            Log.i("Adding High Score", "----------");
+            startActivity(scoreIntent);
+        }else if(view.getId()==R.id.imageButton2){
           if(playerGrid == null){
                 playerGrid = new GridBoard(this, R.id.playerGrid);
                playerGridShow = true;
@@ -65,5 +95,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         }
+
  }
 }

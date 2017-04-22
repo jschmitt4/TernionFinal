@@ -197,6 +197,7 @@ public class GridBoard extends Activity implements OnTouchListener {
 
                     break;
             }
+
         }
         return true;
     }
