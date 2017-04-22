@@ -15,6 +15,7 @@ import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -38,9 +39,11 @@ public class GridBoard extends Activity implements OnTouchListener {
     public Vibrator vb;
     private Point point;
     private int boardID, sizeOfCell, prevShipSize, margin, rowNum, columnNum;
-    private Ship scout_One, scout_Two, cruiser, carrier, motherShip;
+    private Ship scout_One, scout_Two, cruiser, carrier, motherShip, selectedShip;
     private Ship ships[];
     private ArrayList<Point> occupiedCells;
+    private MotionStatus status;
+    private enum MotionStatus{SETUP, DOWN, MOVE, UP};
 
     public GridBoard(Context context, int bID){
         super();
@@ -49,8 +52,12 @@ public class GridBoard extends Activity implements OnTouchListener {
         setVariables();
         setBoard();
         createShips();
-        setDefaultShips();
+        setShips();
+        status = MotionStatus.SETUP;
+
     }
+
+
 
     /**
      * Sets up global variables & on Touch Listeners
@@ -62,6 +69,7 @@ public class GridBoard extends Activity implements OnTouchListener {
         linBoardGame.setOnTouchListener(this);
         sizeOfCell = Math.round(ScreenWidth() / (maxN + (1)));
         prevShipSize = 0;
+        occupiedCells = new ArrayList<>();
     }
 
     /**
@@ -92,24 +100,31 @@ public class GridBoard extends Activity implements OnTouchListener {
         }
     }
 
+
     private void createShips(){
         //context,size, headLocation, bodyLocations
-        point = new Point(9,0); //row, cell
+        point = new Point(maxN-1,0); //row, cell
         scout_One  = new Ship(1, point, maxN , "Scout One");
-        point = new Point(9,1);
+        point = new Point(maxN-1,1);
         scout_Two  = new Ship(1, point, maxN, "Scout Two");
-        point = new Point(8,2);
+        point = new Point(maxN-2,2);
         cruiser    = new Ship(2, point, maxN, "Cruiser");
-        point = new Point(8,3);
+        point = new Point(maxN-2,3);
         carrier    = new Ship(4, point, maxN, "Carrier");
-        point = new Point(6,5);
+        point = new Point(maxN-4,5);
         motherShip = new Ship(12, point, maxN, "MotherShip");
         ships = new Ship []{scout_One, scout_Two, cruiser, carrier, motherShip};
     }
 
-    private void setDefaultShips(){
-        occupiedCells = new ArrayList<>();
+    private void setShips(){
         int row, col;
+        //This Clears the board. To "Invalidate"
+        for (int x = 0; x < maxN; x++) {
+            for (int y = 0; y < maxN; y ++) {
+                ivCell[x][y].setBackgroundResource(R.drawable.grid);
+            }
+        }
+
         for(Ship s : ships) {
             for (int i = 0; i < s.getShipSize(); i++) {
                 row = s.getBodyLocationPoints()[i].x;
@@ -121,11 +136,12 @@ public class GridBoard extends Activity implements OnTouchListener {
     }
 
     private void updateOccupiedCells(Point pointsArray[]){
-        //occupiedCells.clear();
         for(int x = 0; x < pointsArray.length; x++){
             occupiedCells.add(pointsArray[x]);
         }
     }
+
+
 
     /**
      * This method get's the screen size from the resources
@@ -151,11 +167,13 @@ public class GridBoard extends Activity implements OnTouchListener {
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         if(view == linBoardGame) {
-            int x = Math.round(motionEvent.getX());
-            int y = Math.round(motionEvent.getY());
+            int touchX = Math.round(motionEvent.getX());
+            int touchY = Math.round(motionEvent.getY());
+            Point p;
 
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    status = MotionStatus.DOWN;
                     /**
                     if(temp != null) {
                         temp.setBackgroundResource(R.drawable.grid);
@@ -164,9 +182,9 @@ public class GridBoard extends Activity implements OnTouchListener {
                         }
                     }
                     */
-                    touchingView = findViewHelper(x, y);
+                    p = findViewHelper(touchX, touchY);
 
-                    if (touchingView != null) {
+                    if (p != null) {
                         //touchingView.setBackgroundColor(white);
                         //setSurroundingViews(R.drawable.alien_onebytwo_top);
                         //touchingView.setBackgroundResource(R.drawable.alien_onebytwo_top);
@@ -176,7 +194,8 @@ public class GridBoard extends Activity implements OnTouchListener {
 
                     break;
 
-//                case MotionEvent.ACTION_MOVE:
+               case MotionEvent.ACTION_MOVE:
+                   status = MotionStatus.MOVE;
 //                    temp.setBackgroundResource(R.drawable.grid);
 //                    if(temp2 != null){temp2.setBackgroundResource(R.drawable.grid);}
 //                    touchingView = findViewHelper(x, y);
@@ -189,12 +208,28 @@ public class GridBoard extends Activity implements OnTouchListener {
 //                        setSurroundingViews(R.drawable.alien_onebytwo_top);
 //                        temp.setBackgroundResource(R.drawable.alien_onebytwo_top);
 //                    }
-//                    break;
+                   p = findViewHelper(touchX, touchY);
+                   if(p != null && selectedShip != null){//It is empty ready to reload, returns coordinates to place to
+                       selectedShip.moveShipTo(p.x, p.y);
+                       occupiedCells.clear();
+                       setShips();
+                   }
+
+                    break;
 
                 case MotionEvent.ACTION_UP:
                     //This is where we would place our figures!
+                    status = MotionStatus.UP;
+                    p = findViewHelper(touchX, touchY);
 
-
+                    Log.i("INSIDE", ": Action UP");
+                    if(p != null && selectedShip != null){//It is empty ready to reload, returns coordinates to place to
+                        Log.i("INSIDE", ": MOVE SHIP TO");
+                            selectedShip.moveShipTo(p.x, p.y);
+                            occupiedCells.clear();
+                            setShips();
+                    }
+                    selectedShip = null;
                     break;
             }
 
@@ -215,20 +250,38 @@ public class GridBoard extends Activity implements OnTouchListener {
      * @return the found view
      */
     @Nullable
-    private View findViewHelper(int x, int y) {
+    private Point findViewHelper(int x, int y) {
+        Point p;
         for (int row = 0; row < maxN; row++) {
             searchRow = (LinearLayout) linBoardGame.getChildAt(row); //Current row it is checking
 
             if (y > searchRow.getTop() && y < searchRow.getBottom()) {//If the Y coordinates are within the row Check which cell
                 for (int col = 0; col < maxN; col++) {
-                    searchView = searchRow.getChildAt(col); //Current View of the current searchRow
+                    searchView = searchRow.getChildAt(col);    //Current View of the current searchRow
                     if (x > searchView.getLeft() && x < searchView.getRight()) {//If the x coordinates are within the view, View found!
                         rowNum = row;
                         columnNum = col;
                         if(searchView == ivCell[row][col]){ //View found
-                            Point p = checkIfOccupied(row, col);
-                            if(p != null){  //found ship part
-                                findWhichShip(p);
+
+                            if(checkIfOccupied(row, col)){  //It is occupied
+                                p = new Point(row, col);
+                                selectedShip = findWhichShip(p); //Touching View Updated
+                                switch(status){
+                                    case DOWN:
+
+                                        return p;
+
+                                    case MOVE: case UP:
+
+                                        return null;
+                                }
+
+                            }else{
+                                if(status == MotionStatus.UP || status == MotionStatus.MOVE){
+                                    p = new Point(row, col);
+                                    return p;
+                                }
+
                             }
                             // Test Hitting Function
                             boolean isOccupied = checkGridCell();
@@ -237,7 +290,6 @@ public class GridBoard extends Activity implements OnTouchListener {
                                 Log.i("Score = ", "" + score);
                             }
                         }
-                        return null;
                     }//if
                 }//for search View
             }//if
@@ -245,16 +297,18 @@ public class GridBoard extends Activity implements OnTouchListener {
         return null;
     }
 
-    private Point checkIfOccupied(int row, int col){
+    private boolean checkIfOccupied(int row, int col){
         for(int i = 0; i < occupiedCells.size(); i++){
             if(occupiedCells.get(i).x == row && occupiedCells.get(i).y == col){
-                return occupiedCells.get(i);
+                Log.i("OCCUPIED", ": TRUE");
+                return true;
             }
         }
-        return null;
+        Log.i("OCCUPIED", ": FALSE");
+        return false;
     }
 
-    private void findWhichShip(Point p){
+    private Ship findWhichShip(Point p){
         int row, col;
         for(Ship s : ships) {
             for (int i = 0; i < s.getShipSize(); i++) {
@@ -262,11 +316,13 @@ public class GridBoard extends Activity implements OnTouchListener {
                 col = s.getBodyLocationPoints()[i].y;
                 if(row == p.x && col == p.y){
                     Point head = s.getHeadCoordinatePoint();
-                    Toast.makeText(context, "Touched: " + s.getShipName(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, "Touched: " + s.getShipName(), Toast.LENGTH_SHORT).show();
                     touchingView = ivCell[head.x][head.y];
+                    return s;
                 }
             }
         }
+        return null;
     }
 
 
