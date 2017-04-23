@@ -23,7 +23,7 @@ import android.widget.RelativeLayout;
 public class GameActivity extends AppCompatActivity implements View.OnClickListener{
     // Variables
     public static final int activityRef = 2000;
-    private int score=0, count=0;
+    private int score=33, count=0;
 
     public GridBoard playerGrid, enemyGrid;
     public Vibrator vb;
@@ -71,7 +71,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         vb.vibrate(10);
-      
         Log.i("Test High Score", "-----");
         if(view.getId() == R.id.imageButton){
             Intent scoreIntent = new Intent(getApplicationContext(), ScoreActivity.class);

@@ -77,11 +77,10 @@ public class Ship {
 
     public void moveShipTo(int row, int col){
         if(!rotated){
-         while(row > (maxGridSize-height)){
-             row--;
-         }
+            while(row > (maxGridSize-height)){row--;}//Handles border boundries
+            while(col > (maxGridSize-width)){col--;}
         }
-        getHeadCoordinatePoint().set(row, col);
+        headCoordinatePoint.set(row, col);
         setBodyLocationPoints();
     }
 
