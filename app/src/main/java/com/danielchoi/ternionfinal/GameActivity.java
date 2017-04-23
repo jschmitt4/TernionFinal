@@ -61,6 +61,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         Log.i("Test High Score", "-----");
         if(view.getId() == R.id.imageButton){
             Intent scoreIntent = new Intent(getApplicationContext(), ScoreActivity.class);
+            score = 10;
             scoreIntent.putExtra("score", score);
             scoreIntent.putExtra("calling-Activity", activityRef);
             Log.i("Adding High Score", "----------");
