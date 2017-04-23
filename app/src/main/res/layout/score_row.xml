@@ -8,7 +8,7 @@
         <ImageView
             android:layout_width="30dp"
             android:layout_height="50dp"
-            android:src="@mipmap/ic_launcher"
+            android:src="@drawable/person"
             android:id="@+id/imageView"
             android:layout_weight="1"
             />
@@ -21,7 +21,7 @@
             android:textSize="30sp"
             android:gravity="center|start"
             android:layout_weight="1"
-            android:textColor="@color/white" />
+            android:textColor="@color/black" />
 
         <TextView
             android:text="@string/defaultText"
@@ -31,7 +31,7 @@
             android:textSize="30sp"
             android:gravity="center|start"
             android:layout_marginStart="10dp"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:layout_weight="5"
             />
 
@@ -43,6 +43,6 @@
             android:textSize="30sp"
             android:gravity="center|start"
             android:layout_weight="1"
-            android:textColor="@color/white" />
+            android:textColor="@color/black" />
 
 </LinearLayout>

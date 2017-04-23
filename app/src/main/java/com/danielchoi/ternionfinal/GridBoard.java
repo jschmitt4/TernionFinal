@@ -1,6 +1,7 @@
 package com.danielchoi.ternionfinal;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 
 public class GridBoard extends Activity implements OnTouchListener {
 
+    public static final int activityRef = 2000;
     final static int maxN = 10;
     public int score = 0; // Player score adds 200 points for each hit.
     private ImageView[][] ivCell = new ImageView[maxN][maxN];
@@ -220,6 +222,7 @@ public class GridBoard extends Activity implements OnTouchListener {
                         if(searchView == ivCell[row][col]){ //View found
                             checkIfOccupied(row, col);
                         }//if
+                      
                     }//if
                 }//for search View
             }//if
