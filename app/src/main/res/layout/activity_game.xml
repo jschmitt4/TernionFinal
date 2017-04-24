@@ -50,10 +50,11 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/battleIB"
-        android:layout_alignParentBottom="true"
-        android:paddingLeft="25dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
         android:text="Ship"
+        android:layout_marginTop="50dp"
+        android:textSize="40sp"
         android:textColor="@color/black" />
 
     <RelativeLayout

@@ -34,7 +34,7 @@ public class GridBoard extends Activity implements OnTouchListener {
     private Ship ships[], selectedShip;
     private RelativeLayout gridContainer;
     private ArrayList<Point> occupiedCells;
-    private int boardID, sizeOfCell, margin;
+    private int boardID, sizeOfCell, margin, gridID;
     private enum MotionStatus{SETUP, DOWN, MOVE, UP}
     private LinearLayout linBoardGame, linRow, searchRow;
     private ImageView[][] ivCell = new ImageView[maxN][maxN];
@@ -67,8 +67,12 @@ public class GridBoard extends Activity implements OnTouchListener {
         occupiedCells = new ArrayList<>();
         moved = false;
         hit = false;
-        if(!player)lockGrid = true;
-        else lockGrid = false;
+        gridID = R.drawable.grid;
+        if(!player){
+            lockGrid = true;
+        }else {
+            lockGrid = false;
+        }
         shipTV= (TextView) ((Activity)context).findViewById(R.id.textView);
     }
 
@@ -93,7 +97,6 @@ public class GridBoard extends Activity implements OnTouchListener {
             linRow = new LinearLayout(context);
             for (int col = 0; col < maxN; col++) {
                 ivCell[row][col] = new ImageView(context);
-                ivCell[row][col].setBackgroundResource(R.drawable.grid);
                 linRow.addView(ivCell[row][col], lpCell);
             }
             linBoardGame.addView(linRow, lpRow);
@@ -138,7 +141,7 @@ public class GridBoard extends Activity implements OnTouchListener {
         //This clears the board. To "Invalidate"
         for (int x = 0; x < maxN; x++) {
             for (int y = 0; y < maxN; y ++) {
-                ivCell[x][y].setBackgroundResource(R.drawable.grid);
+                ivCell[x][y].setBackgroundResource(gridID);
             }
         }
 
