@@ -1,11 +1,13 @@
 package com.danielchoi.ternionfinal;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.os.AsyncTask;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +17,8 @@ import android.util.Log;
 import android.view.ActionMode;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -26,10 +30,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     public static final int activityRef = 2000;
     private int score=0, count=0;
     private GridBoard playerGrid, enemyGrid;
-    private boolean playerGridShow = false;
+    private boolean playersTurn;
     private TransitionDrawable transition;
     private enum GAMEPHASE{SETUP_PHASE, PLAYER_PHASE, ENEMY_PHASE, GAMEOVER_PHASE}
     public GAMEPHASE gamephase;
+    View layout;
+    ImageView battleButton, alertView;
+    InvasionThread invasion;
 
 
     @Override
@@ -37,13 +44,50 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         vb = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        ImageButton ib = (ImageButton) findViewById(R.id.boardChangeIB);
-        transition = (TransitionDrawable) findViewById(R.id.activity_game).getBackground();
-        ib.setOnClickListener(this);
-        // Test High Score
-        findViewById(R.id.testButton).setOnClickListener(this);
+        alertView = (ImageView) findViewById(R.id.alertView);
+        battleButton = (ImageView) findViewById(R.id.battleIB);
+        layout = findViewById(R.id.activity_game);
         gamephase = GAMEPHASE.SETUP_PHASE;
+        Animation an = AnimationUtils.loadAnimation(this,R.anim.blink );
+        alertView.startAnimation(an);
+        battleButton.setVisibility(View.GONE);
+        invasion = new InvasionThread(this, Math.round(ScreenHeight()));
+        invasion.execute();
 
+
+        layout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (invasion != null){
+                    invasion.cancel(true);
+                    invasion = null;
+                }
+                setSetUpPhase();
+                layout.setOnTouchListener(null);
+                return false;
+            }
+        });
+
+    }
+
+
+    private void setSetUpPhase(){
+        layout = findViewById(R.id.activity_game);
+        int i = layout.getPaddingTop();
+        layout.setPadding(0,i,0,i);
+
+
+
+        findViewById(R.id.invasion).setVisibility(View.GONE);
+        alertView.clearAnimation();
+        alertView.setVisibility(View.INVISIBLE);
+        battleButton.setVisibility(View.VISIBLE);
+        findViewById(R.id.battleIB).setOnClickListener(this);
+        findViewById(R.id.testButton).setOnClickListener(this);
+        transition = (TransitionDrawable) findViewById(R.id.activity_game).getBackground();
+        transition.reverseTransition(750);
+        playerGrid = new GridBoard(this, R.id.playerGrid, true);
+        playersTurn = true;
     }
 
     @Override
@@ -70,23 +114,25 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     Log.i("Adding High Score", "----------");
                     startActivity(scoreIntent);
             }
-        }else if(view.getId()==R.id.boardChangeIB){
+        }else if(view.getId()== R.id.battleIB){
+            gamephase = GAMEPHASE.PLAYER_PHASE;
+            transition.reverseTransition(750);
+            view.setVisibility(View.INVISIBLE);
+            playerGrid.hideGrid();
+            enemyGrid = new GridBoard(this, R.id.enemyGrid, false);
+            playersTurn = false;
 
-          if(playerGrid == null){
-                playerGrid = new GridBoard(this, R.id.playerGrid, true);
-                playerGridShow = true;
-            }else {
-                if (playerGridShow) {
-                    //playerGrid.hideGrid();
-                    transition.reverseTransition(750);
-                    playerGridShow = false;
-                }else if (!playerGridShow) {
-                    //playerGrid.showGrid();
-                    transition.reverseTransition(750);
-                    playerGridShow = true;
-                }
-            }
+            //Now we have to set the a random location for the enemy ships.
+            //And hide it as well.
+
         }
 
- }
+    }
+
+    private float ScreenHeight() {
+        RelativeLayout linBoardGame = (RelativeLayout) findViewById(R.id.activity_game);
+        Resources r = linBoardGame.getResources();
+        DisplayMetrics d = r.getDisplayMetrics();
+        return d.heightPixels;
+    }
 }
