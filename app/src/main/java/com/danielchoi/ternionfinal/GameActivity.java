@@ -3,6 +3,7 @@ package com.danielchoi.ternionfinal;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -25,6 +26,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.HashSet;
@@ -39,7 +41,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private boolean playersTurn;
     private Set<Integer> soundsLoaded;
     private TransitionDrawable transition;
-    private enum GAMEPHASE{SETUP_PHASE, PLAYER_PHASE, ENEMY_PHASE, GAMEOVER_PHASE}
+    private enum GAMEPHASE{INTRO_PHASE, SETUP_PHASE, PLAYER_PHASE, ENEMY_PHASE, GAMEOVER_PHASE}
     public GAMEPHASE gamephase;
     View layout, shipName;
     ImageView battleButton, alertView;
@@ -52,6 +54,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         vb = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        loadSounds();
 
     }
     @Override
@@ -60,57 +63,23 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         View decorView = getWindow().getDecorView();
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
+        SharedPreferences phaseSP = getSharedPreferences("PHASE",Context.MODE_PRIVATE);
+        String gamePhaseString = (phaseSP.getString("PHASE",GAMEPHASE.INTRO_PHASE.name()));
 
-        introPhase();
+        enterPhase(gamePhaseString);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
-        if (soundPool != null) {
-            soundPool.release();
-            soundPool = null;
-            soundsLoaded.clear();
-        }
-        if (invasion != null){
-            invasion.cancel(true);
-            invasion = null;
-        }
+        clearData();
+        SharedPreferences phaseSP = getSharedPreferences("PHASE",Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = phaseSP.edit();
+        editor.putString("PHASE",gamephase.name());
+        editor.apply();
     }
 
-    private void introPhase() {
-
-            alertView = (ImageView) findViewById(R.id.alertView);
-            battleButton = (ImageView) findViewById(R.id.battleIB);
-            layout = findViewById(R.id.activity_game);
-            gamephase = GAMEPHASE.SETUP_PHASE;
-            Animation an = AnimationUtils.loadAnimation(this, R.anim.blink);
-            alertView.startAnimation(an);
-            battleButton.setVisibility(View.GONE);
-            shipName = findViewById(R.id.textView);
-            shipName.setVisibility(View.INVISIBLE);
-            invasion = new InvasionThread(this, Math.round(ScreenHeight()));
-            invasion.execute();
-
-            layout.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    if (invasion != null) {
-                        invasion.cancel(true);
-                        invasion = null;
-                    }
-                    if (soundPool != null) {
-                        soundPool.release();
-                        soundPool = null;
-                        soundsLoaded.clear();
-                    }
-                    setSetUpPhase();
-                    layout.setOnTouchListener(null);
-                    return false;
-                }
-            });
-
+    private void loadSounds(){
 
         soundsLoaded = new HashSet<>();
         AudioAttributes.Builder attrBuilder = new AudioAttributes.Builder();
@@ -120,6 +89,66 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         spBuilder.setAudioAttributes(attrBuilder.build());
         spBuilder.setMaxStreams(4);
         soundPool = spBuilder.build();
+        soundID = new int[]{soundPool.load(this, R.raw.alarm, 1)};
+
+    }
+
+    private void enterPhase(String gamePhaseString){
+        switch(gamePhaseString){
+            case "INTRO_PHASE":
+                gamephase = GAMEPHASE.INTRO_PHASE;
+                defaultGlobalVariables();
+                introPhase();
+                break;
+            case "SETUP_PHASE":
+                gamephase = GAMEPHASE.SETUP_PHASE;
+                defaultGlobalVariables();
+                setUpPhase();
+                break;
+            case "PLAYER_PHASE":
+                gamephase = GAMEPHASE.PLAYER_PHASE;
+                break;
+            case "ENEMY_PHASE":
+                gamephase = GAMEPHASE.ENEMY_PHASE;
+                break;
+            case "GAMEOVER_PHASE":
+                gamephase = GAMEPHASE.GAMEOVER_PHASE;
+                break;
+            default:
+                gamephase = GAMEPHASE.INTRO_PHASE;
+                break;
+
+        }
+
+    }
+
+    private void defaultGlobalVariables(){
+        alertView = (ImageView) findViewById(R.id.alertView);
+        battleButton = (ImageView) findViewById(R.id.battleIB);
+        layout = findViewById(R.id.activity_game);
+        shipName = findViewById(R.id.textView);
+
+    }
+
+    private void introPhase() {
+        gamephase = GAMEPHASE.SETUP_PHASE;
+        shipName.setVisibility(View.GONE);
+        battleButton.setVisibility(View.GONE);
+
+        Animation an = AnimationUtils.loadAnimation(this, R.anim.blink);
+        alertView.startAnimation(an);
+
+        invasion = new InvasionThread(this, Math.round(ScreenHeight()));
+        invasion.execute();
+        layout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                clearData();
+                setUpPhase();
+                return false;
+            }
+        });
+
         soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
             @Override
             public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
@@ -130,32 +159,31 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 } else {
                     Log.i("SOUND", "Error cannot load sound status = " + status);
                 }
-
-
             }
         });
-
-        soundID = new int[]{soundPool.load(this, R.raw.alarm, 1)};
 
 
 
     }
 
-    private void setSetUpPhase(){
-        layout = findViewById(R.id.activity_game);
-        int i = layout.getPaddingTop();
-        layout.setPadding(0,i,0,i);
-
-
-        shipName.setVisibility(View.VISIBLE);
+    private void clearIntroPhase(){
+        layout.setOnTouchListener(null);
         findViewById(R.id.invasion).setVisibility(View.GONE);
         alertView.clearAnimation();
         alertView.setVisibility(View.INVISIBLE);
+    }
+
+    private void setUpPhase(){
+        gamephase = GAMEPHASE.SETUP_PHASE;
+        clearIntroPhase();
+        int i = layout.getPaddingTop();
+        layout.setPadding(0,i,0,i);
+        transition = (TransitionDrawable) findViewById(R.id.activity_game).getBackground();
+        transition.reverseTransition(750);
+        shipName.setVisibility(View.VISIBLE);//Temp reference
         battleButton.setVisibility(View.VISIBLE);
         findViewById(R.id.battleIB).setOnClickListener(this);
         findViewById(R.id.testButton).setOnClickListener(this);
-        transition = (TransitionDrawable) findViewById(R.id.activity_game).getBackground();
-        transition.reverseTransition(750);
         playerGrid = new GridBoard(this, R.id.playerGrid, true);
         playersTurn = true;
     }
@@ -167,6 +195,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
 
         if(view.getId() == R.id.testButton){
+            gamephase = GAMEPHASE.INTRO_PHASE; //Temp to reset game. It should be in the GAMEOVER_PHASE
             if(playerGrid !=null) {
                 if(playerGrid.getHit()) score = score +2000;
                     Log.i("Test High Score", "-----");
@@ -190,6 +219,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
         }
 
+    }
+
+    private void clearData(){
+
+        if (invasion != null) {
+            invasion.cancel(true);
+            invasion = null;
+        }
+        if (soundPool != null) {
+            soundPool.release();
+            soundPool = null;
+            soundsLoaded.clear();
+        }
     }
 
     private float ScreenHeight() {
