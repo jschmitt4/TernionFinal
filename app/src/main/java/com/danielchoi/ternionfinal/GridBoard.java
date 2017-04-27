@@ -3,7 +3,7 @@ package com.danielchoi.ternionfinal;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
+import android.graphics.Point;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
@@ -11,10 +11,11 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -24,26 +25,34 @@ import java.util.ArrayList;
 
 public class GridBoard extends Activity implements OnTouchListener {
 
-    final static int maxN = 10;
-    int score = 0; // Player score adds 200 points for each hit.
-    private ImageView[][] ivCell = new ImageView[maxN][maxN];
-    int white = Color.parseColor("#FFFFFF");
-    private View temp,temp2, touchingView;
-    private Context context;
-    private RelativeLayout gridContainer;
-    private LinearLayout linBoardGame, linRow, searchRow;
-    private View searchView;
-    private boolean atBottom = false;
     public Vibrator vb;
-    private int boardID, sizeOfCell, prevShipSize, margin, rowNum, columnNum;
-    private Ship ship = new Ship();
+    private Point point;
+    private Context context;
+    final static int maxN = 8;
+    private MotionStatus status;
+    private boolean moved, player, hit, lockGrid;
+    private Ship ships[], selectedShip;
+    private RelativeLayout gridContainer;
+    private ArrayList<Point> occupiedCells;
+    private int boardID, sizeOfCell, margin, gridID;
+    private enum MotionStatus{SETUP, DOWN, MOVE, UP}
+    private LinearLayout linBoardGame, linRow, searchRow;
+    private ImageView[][] ivCell = new ImageView[maxN][maxN];
+    TextView shipTV;
 
-    public GridBoard(Context context, int bID){
+
+
+    public GridBoard(Context context, int bID, boolean player){
         super();
         this.context = context;
         boardID = bID;
+        this.player = player; //False will be AI, True will be player
         setVariables();
         setBoard();
+        createShips();
+        setShips();
+        status = MotionStatus.SETUP;
+
     }
 
     /**
@@ -53,10 +62,18 @@ public class GridBoard extends Activity implements OnTouchListener {
         vb =  (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         linBoardGame = (LinearLayout) ((Activity)context).findViewById(boardID);
         gridContainer = (RelativeLayout) ((Activity)context).findViewById(R.id.gridContainer);
-        gridContainer.setOnTouchListener(this);
         linBoardGame.setOnTouchListener(this);
         sizeOfCell = Math.round(ScreenWidth() / (maxN + (1)));
-        prevShipSize = 0;
+        occupiedCells = new ArrayList<>();
+        moved = false;
+        hit = false;
+        gridID = R.drawable.grid;
+        if(!player){
+            lockGrid = true;
+        }else {
+            lockGrid = false;
+        }
+        shipTV= (TextView) ((Activity)context).findViewById(R.id.textView);
     }
 
     /**
@@ -76,21 +93,75 @@ public class GridBoard extends Activity implements OnTouchListener {
         LinearLayout.LayoutParams lpRow = new LinearLayout.LayoutParams(sizeOfCell * maxN, sizeOfCell);
         LinearLayout.LayoutParams lpCell = new LinearLayout.LayoutParams(sizeOfCell, sizeOfCell);
 
-        for (int x = 0; x < maxN; x++) {
+        for (int row = 0; row < maxN; row++) {
             linRow = new LinearLayout(context);
-            for (int y = 0; y < maxN; y++) {
-                ivCell[x][y] = new ImageView(context);
-                ivCell[x][y].setBackgroundResource(R.drawable.grid);
-                linRow.addView(ivCell[x][y], lpCell);
+            for (int col = 0; col < maxN; col++) {
+                ivCell[row][col] = new ImageView(context);
+                linRow.addView(ivCell[row][col], lpCell);
             }
             linBoardGame.addView(linRow, lpRow);
         }
+
+        if(player){
+            ImageButton ib = (ImageButton) ((Activity)context).findViewById(R.id.battleIB);
+            RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) ib.getLayoutParams();
+            lp.height = (margin*2)/3;
+            lp.width = margin * 2;
+            ib.setLayoutParams(lp);
+
+        }
     }
 
+    /**
+     * This initializes all the Ship classes with a starting coordinate
+     */
     private void createShips(){
+        //context,size, headLocation, bodyLocations
+        Ship scout_One, scout_Two, cruiser, carrier, motherShip;
+        point = new Point(maxN-1,0); //row, cell
+        scout_One  = new Ship(1, point, maxN , "Scout One", player);
+        point = new Point(maxN-1,1);
+        scout_Two  = new Ship(1, point, maxN, "Scout Two", player);
+        point = new Point(maxN-2,2);
+        cruiser    = new Ship(2, point, maxN, "Cruiser", player);
+        point = new Point(maxN-2,3);
+        carrier    = new Ship(4, point, maxN, "Carrier", player);
+        point = new Point(maxN-4,5);
+        motherShip = new Ship(12, point, maxN, "MotherShip", player);
+
+        ships = new Ship []{scout_One, scout_Two, cruiser, carrier, motherShip};
     }
 
-    private void setDefaultShips(){
+    /**
+     * This class clears the grid of all ship images
+     * Then it replaces them on the new location
+     * To handle movements
+     */
+    private void setShips(){
+        //This clears the board. To "Invalidate"
+        for (int x = 0; x < maxN; x++) {
+            for (int y = 0; y < maxN; y ++) {
+                ivCell[x][y].setBackgroundResource(gridID);
+            }
+        }
+
+        for(Ship s : ships) {
+            for (int i = 0; i < s.getShipSize(); i++) {
+                ivCell[s.getBodyLocationPoints()[i].x][s.getBodyLocationPoints()[i].y].setBackgroundResource(s.getBodyResources()[i]);
+                updateOccupiedCells(s.getBodyLocationPoints());
+            }
+        }
+    }
+
+    /**
+     * This updates the occupiedCells ArrayList of Points
+     * To keep track of which Points are occupied
+     * @param pointsArray
+     */
+    private void updateOccupiedCells(Point pointsArray[]){
+        for(int x = 0; x < pointsArray.length; x++){
+            occupiedCells.add(pointsArray[x]);
+        }
     }
 
     /**
@@ -98,25 +169,16 @@ public class GridBoard extends Activity implements OnTouchListener {
      * @return the width in pixels
      */
     private float ScreenWidth() {
-        RelativeLayout linBoardGame = (RelativeLayout) ((Activity)context).findViewById(R.id.activity_game);
+        RelativeLayout linBoardGame = (RelativeLayout) ((Activity)context).findViewById(R.id.gridContainer);
         Resources r = linBoardGame.getResources();
         DisplayMetrics d = r.getDisplayMetrics();
         return d.widthPixels;
     }
-    private float ScreenHeight() {
-        RelativeLayout linBoardGame = (RelativeLayout) ((Activity)context).findViewById(R.id.activity_game);
-        Resources r = linBoardGame.getResources();
-        DisplayMetrics d = r.getDisplayMetrics();
-        return d.heightPixels;
-    }
-
 
     /**
-     * This is a temp animation to follow finger movements
-     * Might not need this in main game functionality.
-     * Game visual feature
+     * This is handling setting the ships to their appropriate cells
+     * For set up phase
      * It calls findViewHelper
-     * The temp & temp2 variable are holding previous location to revert back to grid.
      * @param view
      * @param motionEvent
      * @return true
@@ -124,144 +186,152 @@ public class GridBoard extends Activity implements OnTouchListener {
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         if(view == linBoardGame) {
-            /**
-            if (!defaultSet) {
-                createShips();
-                setDefaultShips();
-            }
-             */
-            int x = Math.round(motionEvent.getX());
-            int y = Math.round(motionEvent.getY());
+            int touchX = Math.round(motionEvent.getX());
+            int touchY = Math.round(motionEvent.getY());
 
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    Log.i("GRID", "Coordinates");
-                    Log.i("X: ", "" + x);
-                    Log.i("Y: ", "" + y);
-
-                    // Create Ships;
-                    ship.setShipName("alien_onebyone");
-                    ship.setShipSize(1);
-                    ship.setShipLocation(new int[]{x, y});
-                    ship.setShipPieces(new int[]{R.drawable.alien_onebytwo_top,R.drawable.alien_onebytwo_bottom});
-                    Log.i("Ship Log ", ship.toString());
-
-                    if(temp != null) {
-                        temp.setBackgroundResource(R.drawable.grid);
-                        if(temp2 != null){
-                            temp2.setBackgroundResource(R.drawable.grid);
-                        }
-                    }
-                    touchingView = findViewHelper(ship.shipLocation[0], ship.shipLocation[1]);
-                    if (touchingView != null) {
-                        //touchingView.setBackgroundColor(white);
-                        setSurroundingViews(ship.shipPieces[0]);
-                        touchingView.setBackgroundResource(ship.shipPieces[0]);
-                        temp = touchingView;
+                    status = MotionStatus.DOWN;
+                    selectedShip = null;
+                    findViewHelper(touchX, touchY);
+                    if(selectedShip != null) {
+                        shipTV.setText(selectedShip.getShipName());
                     }
                     break;
-//                case MotionEvent.ACTION_MOVE:
-//                    temp.setBackgroundResource(R.drawable.grid);
-//                    if(temp2 != null){temp2.setBackgroundResource(R.drawable.grid);}
-//                    touchingView = findViewHelper(x, y);
-//                    if (touchingView != null) {
-//                        setSurroundingViews(R.drawable.alien_onebytwo_top);
-//                        touchingView.setBackgroundResource(R.drawable.alien_onebytwo_top);
-//                        if (touchingView != temp && !atBottom) vb.vibrate(1);
-//                        temp = touchingView;
-//                    }else if (touchingView == null){
-//                        setSurroundingViews(R.drawable.alien_onebytwo_top);
-//                        temp.setBackgroundResource(R.drawable.alien_onebytwo_top);
-//                    }
-//
-//                    break;
+               case MotionEvent.ACTION_MOVE:
+                   status = MotionStatus.MOVE;
+                   if(!lockGrid){
+                       findViewHelper(touchX, touchY);
+                       if(selectedShip != null) {
+                           //TODO: Need to try to handle this so that it only fires if ship ACTUALLY moves.
+                           //Not priority but will help us with resources and allow us to use vibrate and sounds
+                           //And so that it doesnt do unneccesary loops and clears.
+                           //vb.vibrate(10);
+                           Log.i("Clearing and reset","!");
+                           occupiedCells.clear();
+                           setShips();
+                       }
+                   }
+                    break;
                 case MotionEvent.ACTION_UP:
-                    //This is where we would place our figures!
+                    status = MotionStatus.UP;
                     break;
             }
-        }else{
-            int x = Math.round(motionEvent.getX());
-            int y = Math.round(motionEvent.getY());
-            Log.i("CONTAINER", "COORDINATES");
-            Log.i("X: ", "" + x);
-            Log.i("Y: ", "" + y);
 
         }
         return true;
     }
-    private boolean checkGridCell(){
-        // Test Hitting / Scoring Function
-        return true;
-    }
+
     /**
      * A nested for loop that scans each cell in the row to find which view is being touched
      * Takes in the x & y coordinates that was touched
+     * If a matching view is found, It calls the check if occupied method.
      * @param x
      * @param y
      * @return the found view
      */
     @Nullable
-    private View findViewHelper(int x, int y) {
-        for (int i = 0; i < maxN; i++) {
-            searchRow = (LinearLayout) linBoardGame.getChildAt(i); //Current row it is checking
+    private void findViewHelper(int x, int y) {
+        View searchView;
+        for (int row = 0; row < maxN; row++) {
+            searchRow = (LinearLayout) linBoardGame.getChildAt(row); //Current row it is checking
 
             if (y > searchRow.getTop() && y < searchRow.getBottom()) {//If the Y coordinates are within the row Check which cell
-                for (int j = 0; j < maxN; j++) {
-                    searchView = searchRow.getChildAt(j); //Current View of the current searchRow
+                for (int col = 0; col < maxN; col++) {
+                    searchView = searchRow.getChildAt(col);    //Current View of the current searchRow
                     if (x > searchView.getLeft() && x < searchView.getRight()) {//If the x coordinates are within the view, View found!
-                        rowNum = i;
-                        columnNum = j;
-                        if(searchView == ivCell[i][j]){
-                            Log.i("ROW to CELL", "MATCH!");
-                            // Test Hitting Function
-                            boolean isOccupied = checkGridCell();
-                            if(isOccupied){
-                                score += 200;
-                                Log.i("Score = ", "" + score);
-                            }
-                        }
-                        else Log.i("ROW to CELL", "MisMatch!");
-                        return searchView;
+                        if(searchView == ivCell[row][col]){ //View found
+                            checkIfOccupied(row, col);
+                        }//if
                     }//if
                 }//for search View
             }//if
         }//for searchRow
-        return null;
     }
 
     /**
-     * This currently receives the id from onTouch to create the bottom view.
-     * temp hard code.
-     * @param id
+     * This takes the row/col coordinates from findViewHelper
+     * and compares with the occupiedCell ArrayList to if there is a ship part in that coordinate.
+     * ON_DOWN: If it is occupied it calls the findWhichShip.
+     * ON_MOVE: It moves the ship to that location.
+     *          compares the new location to see if there is any ships in the way
+     *          if there is it reverts back to the previous position.
+     * After this method runs, it should traverse back into the ONTOUCH events.
+     *
+     * @param row
+     * @param col
+     * @return
      */
-    private void setSurroundingViews(int id){
-        if (id == ship.shipPieces[0]) {
-            searchRow = (LinearLayout)  linBoardGame.getChildAt(rowNum+1);
-            if(searchRow != null) {
-                searchView = searchRow.getChildAt(columnNum);
-                searchView.setBackgroundResource(ship.shipPieces[1]);
-                temp2 = searchView;
-                atBottom = false;
-            }else{
-                searchRow = (LinearLayout)  linBoardGame.getChildAt(rowNum);
-                searchView = searchRow.getChildAt(columnNum);
-                temp2 = searchView;
-                temp2.setBackgroundResource(ship.shipPieces[1]);
-                searchRow = (LinearLayout)  linBoardGame.getChildAt(rowNum-1);
-                searchView = searchRow.getChildAt(columnNum);
-                touchingView = searchView;
-                atBottom = true;
+    private void checkIfOccupied(int row, int col){
+        if(status == MotionStatus.DOWN) {
+            for (int i = 0; i < occupiedCells.size(); i++) {
+                if (occupiedCells.get(i).x == row && occupiedCells.get(i).y == col) {
+                    Log.i("OCCUPIED", ": TRUE");
+                    Point p = new Point(row, col);
+                    selectedShip = findWhichShip(p); //Touching View Updated
+                    hit = true;
+                }
             }
-        } else {
-            Toast.makeText(context, "False" + Toast.LENGTH_SHORT, Toast.LENGTH_SHORT).show();
+            if(selectedShip == null)Log.i("OCCUPIED", ": FALSE");
+
+
+        }else if(status == MotionStatus.MOVE){//MotionStatus.MOVE
+             if(selectedShip != null){//Need to make sure none of the current ship parts will overlap another.
+                 int rowHolder = selectedShip.getHeadCoordinatePoint().x;
+                 int colHolder = selectedShip.getHeadCoordinatePoint().y;
+                 int tempRow, tempCol;
+                 selectedShip.moveShipTo(row, col);
+                 for(Ship s : ships) {
+                     if(s != selectedShip) {
+
+                         for (int i = 0; i < selectedShip.getShipSize(); i++) {
+                             tempRow = selectedShip.getBodyLocationPoints()[i].x;
+                             tempCol = selectedShip.getBodyLocationPoints()[i].y;
+
+                             for(int j = 0; j < s.getShipSize();j++){
+                                if(tempRow == s.getBodyLocationPoints()[j].x && tempCol == s.getBodyLocationPoints()[j].y){
+                                    selectedShip.moveShipTo(rowHolder, colHolder);
+                                }
+                             }//for
+                         }//for
+                     }
+                 }//for
+             }
         }
     }
 
+    /**
+     * This is called from check if occupied on MOTION.DOWN
+     * This returns the Ship object that was selected.
+     * AND updates the touchingview to be headCoordinate of the ship.
+     * This should never return null at this point. But we can handle it if it does.
+     * @param p
+     * @return
+     */
+    private Ship findWhichShip(Point p){
+        int row, col;
+        for(Ship s : ships) {
+            for (int i = 0; i < s.getShipSize(); i++) {
+                row = s.getBodyLocationPoints()[i].x;
+                col = s.getBodyLocationPoints()[i].y;
+                if(row == p.x && col == p.y){
+                    //Point head = s.getHeadCoordinatePoint();
+                    //touchingView = ivCell[head.x][head.y];
+                    Log.i("VIEW FOUND: ","!!!!!!!!!!!!!!!!");
+                    return s;
+                }
+            }
+        }
+        return null;
+    }
 
     public void hideGrid(){linBoardGame.setVisibility(View.GONE);}
     public void showGrid(){
         linBoardGame.setVisibility(View.VISIBLE);
     }
+    public boolean getHit(){return hit;}
+    public void setHit(){hit = false;}
+    public void setLockGrid(boolean lock){lockGrid = lock;}
 
 
 }
