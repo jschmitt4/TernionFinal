@@ -13,13 +13,15 @@ public class Ship {
     private int[]   bodyResources;
     private String  shipName;
     public boolean  rotated = false;
+    public boolean  player; //true is player false is enemy
 
 
-    public Ship(int shipSize, Point p, int maxGridSize, String shipName){
+    public Ship(int shipSize, Point p, int maxGridSize, String shipName, boolean player){
         this.setShipSize(shipSize);
         this.headCoordinatePoint = p;
         this.maxGridSize = maxGridSize;
         this.shipName = shipName;
+        this.player = player;
         bodyLocationPoints = new Point[shipSize];
         setBodyResources();
         setBodyLocationPoints();
@@ -28,12 +30,23 @@ public class Ship {
     private void setBodyResources(){
         switch(shipSize){
             case 1:
+                if(player)
+                    bodyResources = new int[] {
+                            R.drawable.moon_onebyone};
+                else if(!player)
                 bodyResources = new int[] {
                         R.drawable.alien_onebyone};
+
                 width   = 1;
                 height  = 1;
                 break;
             case 2:
+                if(player)
+                    bodyResources = new int[] {
+                            R.drawable.moon_onebytwo_top,
+                            R.drawable.moon_onebytwo_bottom};
+
+                else if(!player)
                 bodyResources = new int[] {
                         R.drawable.alien_onebytwo_top,
                         R.drawable.alien_onebytwo_bottom};
@@ -41,6 +54,12 @@ public class Ship {
                 height  = 2;
                 break;
             case 4:
+                if(player)
+                    bodyResources = new int[] {
+                            R.drawable.moon_twobytwo_topleft, R.drawable.moon_twobytwo_topright,
+                            R.drawable.moon_twobytwo_bottom_left, R.drawable.moon_twobytwo_bottom_right};
+
+                else if(!player)
                 bodyResources = new int[] {
                         R.drawable.alien_twobytwo_topleft, R.drawable.alien_twobytwo_topright,
                         R.drawable.alien_twobytwo_bottomleft, R.drawable.alien_twobytwo_bottomright};
@@ -48,6 +67,14 @@ public class Ship {
                 height  = 2;
                 break;
             case 12:
+                if(player)
+                    bodyResources = new int[]{
+                            R.drawable.moon_threebyfour_one,    R.drawable.moon_threebyfour_two,      R.drawable.moon_threebyfour_three,
+                            R.drawable.moon_threebyfour_four,  R.drawable.moon_threebyfour_five,      R.drawable.moon_threebyfour_six,
+                            R.drawable.moon_threebyfour_seven, R.drawable.moon_threebyfour_eight,     R.drawable.moon_threebyfour_nine,
+                            R.drawable.moon_threebyfour_ten,   R.drawable.moon_threebyfour_twelve,    R.drawable.moon_threebyfour_eleven};
+
+                else if(!player)
                 bodyResources = new int[]{
                         R.drawable.alien_threebyfour_one,   R.drawable.alien_threebyfour_two,       R.drawable.alien_threebyfour_three,
                         R.drawable.alien_threebyfour_four,  R.drawable.alien_threebyfour_five,      R.drawable.alien_threebyfour_six,
