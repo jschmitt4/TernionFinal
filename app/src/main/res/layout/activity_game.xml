@@ -29,12 +29,15 @@
         app:srcCompat="@drawable/invasion_warning" />
 
     <ImageButton
-        android:id="@+id/testButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/menuButton"
+        android:layout_width="40dp"
+        android:layout_height="30dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
-        app:srcCompat="@android:drawable/arrow_down_float" />
+        android:scaleType="fitXY"
+        android:background="#00000000"
+        app:srcCompat="@drawable/menu"
+        android:onClick="popupMenu" />
 
     <ImageButton
         android:id="@+id/battleIB"
@@ -45,6 +48,16 @@
         android:background="#00000000"
         android:scaleType="fitXY"
         app:srcCompat="@drawable/battle" />
+
+    <ImageButton
+        android:id="@+id/fireIB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="#00000000"
+        android:scaleType="fitXY"
+        app:srcCompat="@drawable/fire" />
 
     <TextView
         android:id="@+id/textView"

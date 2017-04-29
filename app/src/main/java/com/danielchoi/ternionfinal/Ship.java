@@ -87,7 +87,6 @@ public class Ship {
 
     }
 
-
     /**
      * This set the rest of the ships body based in the location of the head
      */
@@ -111,8 +110,6 @@ public class Ship {
         setBodyLocationPoints();
     }
 
-
-
     public int getShipSize() {
         return shipSize;
     }
@@ -133,9 +130,7 @@ public class Ship {
         return headCoordinatePoint;
     }
 
-    public void setHeadCoordinatePoint(Point headCoordinatePoint) {
-        this.headCoordinatePoint = headCoordinatePoint;
-    }
+    public void setHeadCoordinatePoint(Point headCoordinatePoint) {this.headCoordinatePoint = headCoordinatePoint;}
 
     public String getShipName(){return shipName;}
 }
