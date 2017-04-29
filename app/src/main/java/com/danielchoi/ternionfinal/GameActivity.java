@@ -1,6 +1,5 @@
 package com.danielchoi.ternionfinal;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,31 +10,37 @@ import android.media.SoundPool;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.PopupMenu;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class GameActivity extends AppCompatActivity implements View.OnClickListener{
+public class GameActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener{
     // Variables
     public Vibrator vb;
     public static final int activityRef = 2000;
-    private int score=0, count=0, soundID[];
+    private int score=0, count=0, soundID[], cellCount;
     private GridBoard playerGrid, enemyGrid;
     private boolean playersTurn;
     private Set<Integer> soundsLoaded;
     private TransitionDrawable transition;
     private enum GAMEPHASE{INTRO_PHASE, SETUP_PHASE, PLAYER_PHASE, ENEMY_PHASE, GAMEOVER_PHASE}
     public GAMEPHASE gamephase;
+    public GamePhase playerGP, enemyGP;
     View layout, shipName;
-    ImageView battleButton, alertView;
+    ImageView battleButton, alertView, fireButton;
     InvasionThread invasion;
     SoundPool soundPool;
 
@@ -47,6 +52,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         vb = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -57,7 +63,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         String gamePhaseString = (phaseSP.getString("PHASE",GAMEPHASE.INTRO_PHASE.name()));
 
         loadSounds();
-        enterPhase(gamePhaseString);
+        defaultGlobalVariables();
+        introPhase();
+        //enterPhase(gamePhaseString);
     }
 
     @Override
@@ -91,7 +99,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
      * This method will be used to load up previous gamestates
      */
     private void loadSaveState(){
-
 
     }
 
@@ -131,12 +138,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             default:
                 gamephase = GAMEPHASE.INTRO_PHASE;
+                introPhase();
                 break;
 
         }
 
     }
-
 
     /**
      * Loads the default variables need for each phase
@@ -144,10 +151,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private void defaultGlobalVariables(){
         alertView = (ImageView) findViewById(R.id.alertView);
         battleButton = (ImageView) findViewById(R.id.battleIB);
+        fireButton = (ImageView) findViewById(R.id.fireIB);
         layout = findViewById(R.id.activity_game);
         shipName = findViewById(R.id.textView);
-        findViewById(R.id.testButton).setOnClickListener(this); // going to be the menu button
-
+        cellCount = 8;
     }
 
     /**
@@ -156,8 +163,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void introPhase() {
         gamephase = GAMEPHASE.SETUP_PHASE;
-        shipName.setVisibility(View.INVISIBLE);
-        battleButton.setVisibility(View.INVISIBLE);
+        shipName.setVisibility(View.GONE);
+        battleButton.setVisibility(View.GONE);
+        fireButton.setVisibility(View.GONE);
 
         Animation an = AnimationUtils.loadAnimation(this, R.anim.blink);
         alertView.startAnimation(an);
@@ -192,7 +200,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.invasion).setVisibility(View.INVISIBLE);
     }
 
-
     /**
      * Setups the correcting padding.
      * Transitions the background
@@ -202,13 +209,16 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private void setUpPhase(){
         gamephase = GAMEPHASE.SETUP_PHASE;
         int i = layout.getPaddingTop();
-        layout.setPadding(0,i,0,i);
+        layout.setPadding(i,i,i,i);
         transition = (TransitionDrawable) findViewById(R.id.activity_game).getBackground();
         transition.reverseTransition(750);
-        shipName.setVisibility(View.VISIBLE);//Temp reference
+        shipName.setVisibility(View.GONE);//Temp reference
         battleButton.setVisibility(View.VISIBLE);
-        findViewById(R.id.battleIB).setOnClickListener(this);
-        if(playerGrid == null)playerGrid = new GridBoard(this, R.id.playerGrid, true);
+        fireButton.setVisibility(View.GONE);
+        battleButton.setOnClickListener(this);
+        fireButton.setOnClickListener(this);
+        if(playerGrid == null)playerGrid = new GridBoard(this, R.id.playerGrid, true, cellCount);
+        setDynamicButtonSize();
 
     }
 
@@ -216,12 +226,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
      * Clears up setup phase to prep for Player phase
      */
     private void clearSetUpPhase(){
-        battleButton.setVisibility(View.INVISIBLE);
-        shipName.setVisibility(View.INVISIBLE);
+        battleButton.setVisibility(View.GONE);
+        shipName.setVisibility(View.GONE);
         if(playerGrid != null)playerGrid.hideGrid();
 
     }
-
 
     /**
      * This is the player where we would pick the enemies coordinates to attack
@@ -229,31 +238,21 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private void playerPhase(){
         gamephase = GAMEPHASE.PLAYER_PHASE;
         playersTurn = true;
-        if(enemyGrid == null)enemyGrid = new GridBoard(this, R.id.enemyGrid, false);
-    }
-
+        fireButton.setVisibility(View.VISIBLE);
+        //playerGP = new GamePhase(this, playerGrid.getShipsPosition(), playerGrid.getShips());
+        if(enemyGrid == null)enemyGrid = new GridBoard(this, R.id.enemyGrid, false, cellCount);
+}
 
     @Override
     public void onClick(View view) {
         vb.vibrate(10);
 
-
-        if(view.getId() == R.id.testButton){
-            gamephase = GAMEPHASE.INTRO_PHASE; //Temp to reset game. It should be in the GAMEOVER_PHASE
-            if(playerGrid !=null) {
-                if(playerGrid.getHit()) score = score +2000;
-                    Log.i("Test High Score", "-----");
-                    Intent scoreIntent = new Intent(getApplicationContext(), ScoreActivity.class);
-                    scoreIntent.putExtra("score", score);
-                    scoreIntent.putExtra("calling-Activity", activityRef);
-                    Log.i("Adding High Score", "----------");
-                    startActivity(scoreIntent);
-            }
-        }else if(view.getId()== R.id.battleIB){
+        if(view.getId()== R.id.battleIB){
             transition.reverseTransition(750);
             clearSetUpPhase();
             playerPhase();
 
+        }else if(view.getId() == R.id.fireIB){
 
         }
 
@@ -263,7 +262,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
      * This takes in the index valie of the soundID to play
      * @param i
      */
-
     private void playSounds(int i){
         final int index = i;
         soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
@@ -306,5 +304,69 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         Resources r = linBoardGame.getResources();
         DisplayMetrics d = r.getDisplayMetrics();
         return d.heightPixels;
+    }
+
+    private void setDynamicButtonSize(){
+
+        int margin = playerGrid.getMarginSize();
+        int height = (margin*2)/3;
+        int width = margin * 2;
+
+        ImageButton ib = (ImageButton) findViewById(R.id.battleIB);
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) ib.getLayoutParams();
+        lp.height = height;
+        lp.width = width;
+        ib.setLayoutParams(lp);
+
+        ImageButton ib2 = (ImageButton) findViewById(R.id.fireIB);
+        RelativeLayout.LayoutParams lp2 = (RelativeLayout.LayoutParams) ib.getLayoutParams();
+        lp2.height = height;
+        lp2.width = width;
+        ib2.setLayoutParams(lp2);
+
+
+    }
+
+    /**
+     * popupMenu...
+     */
+    public void popupMenu(View v) {
+        vb.vibrate(10);
+        PopupMenu popup = new PopupMenu(this, v);
+        popup.setOnMenuItemClickListener(this);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.menu, popup.getMenu());
+        popup.show();
+    }
+
+    /**
+     * onMenuItemClick detects what menu item was clicked.
+     *
+     * @param item The menu item clicked.
+     */
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        vb.vibrate(10);
+
+        if (item.getItemId() == R.id.highScore) {
+            gamephase = GAMEPHASE.INTRO_PHASE; //Temp to reset game. It should be in the GAMEOVER_PHASE
+            if (playerGrid != null) {
+                if (playerGrid.getHit()) score = score + 2000;
+                Log.i("Test High Score", "-----");
+                Intent scoreIntent = new Intent(getApplicationContext(), ScoreActivity.class);
+                scoreIntent.putExtra("score", score);
+                scoreIntent.putExtra("calling-Activity", activityRef);
+                Log.i("Adding High Score", "----------");
+                startActivity(scoreIntent);
+
+            }else Toast.makeText(this, "This is a test phase button. \nMust be in game to work", Toast.LENGTH_SHORT).show();
+
+        }else if (item.getItemId() == R.id.actionQuit) {
+            gamephase = GAMEPHASE.INTRO_PHASE; //Temp to reset game. It should be in the GAMEOVER_PHASE
+            onBackPressed();
+
+        }
+
+        return false;
     }
 }
