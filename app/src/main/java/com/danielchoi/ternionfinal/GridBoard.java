@@ -271,10 +271,10 @@ public class GridBoard extends Activity implements OnTouchListener {
                     Point p = new Point(row, col);
                     selectedShip = findWhichShip(p); //Touching View Updated
                     hit = true;
+                    return; // Exit loop when match found.
                 }
             }
             if(selectedShip == null)Log.i("OCCUPIED", ": FALSE");
-
 
         }else if(status == MotionStatus.MOVE){//MotionStatus.MOVE
              if(selectedShip != null){//Need to make sure none of the current ship parts will overlap another.
@@ -361,6 +361,14 @@ public class GridBoard extends Activity implements OnTouchListener {
         }
         return null;
     }
+
+    /**
+     * Player Attack!
+     */
+    public void playerAttack(){
+
+    }
+
 
     public void hideGrid(){linBoardGame.setVisibility(View.GONE);}
     public void showGrid(){
