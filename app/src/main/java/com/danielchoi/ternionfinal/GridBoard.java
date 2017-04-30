@@ -11,13 +11,14 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Created by Daniel on 4/8/2017.
@@ -38,15 +39,19 @@ public class GridBoard extends Activity implements OnTouchListener {
     private enum MotionStatus{SETUP, DOWN, MOVE, UP}
     private LinearLayout linBoardGame, linRow, searchRow;
     private ImageView[][] ivCell = new ImageView[maxN][maxN];
-    TextView shipTV;
+    private TextView shipTV;
+    private boolean AIisAttacking = false;
+    private boolean isNewCell = false;
+    Vector[][] aiSelection = new Vector[maxN][maxN]; // 2d Vector for A.I. to randomly choose hits on grid
+    Vector<Vector> aiAttacks = new Vector(); // Stores aiSelection Vector to track previous hits
 
 
-
-    public GridBoard(Context context, int bID, boolean player){
+    public GridBoard(Context context, int bID, boolean player, int cellCount){
         super();
         this.context = context;
         boardID = bID;
         this.player = player; //False will be AI, True will be player
+        //maxN = cellCount; //Makes it crash for some reason
         setVariables();
         setBoard();
         createShips();
@@ -62,18 +67,16 @@ public class GridBoard extends Activity implements OnTouchListener {
         vb =  (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         linBoardGame = (LinearLayout) ((Activity)context).findViewById(boardID);
         gridContainer = (RelativeLayout) ((Activity)context).findViewById(R.id.gridContainer);
+        shipTV= (TextView) ((Activity)context).findViewById(R.id.textView);
         linBoardGame.setOnTouchListener(this);
         sizeOfCell = Math.round(ScreenWidth() / (maxN + (1)));
         occupiedCells = new ArrayList<>();
         moved = false;
         hit = false;
         gridID = R.drawable.grid;
-        if(!player){
-            lockGrid = true;
-        }else {
-            lockGrid = false;
-        }
-        shipTV= (TextView) ((Activity)context).findViewById(R.id.textView);
+        if(!player)lockGrid = true;
+        else lockGrid = false;
+
     }
 
     /**
@@ -102,14 +105,6 @@ public class GridBoard extends Activity implements OnTouchListener {
             linBoardGame.addView(linRow, lpRow);
         }
 
-        if(player){
-            ImageButton ib = (ImageButton) ((Activity)context).findViewById(R.id.battleIB);
-            RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) ib.getLayoutParams();
-            lp.height = (margin*2)/3;
-            lp.width = margin * 2;
-            ib.setLayoutParams(lp);
-
-        }
     }
 
     /**
@@ -129,6 +124,8 @@ public class GridBoard extends Activity implements OnTouchListener {
         point = new Point(maxN-4,5);
         motherShip = new Ship(12, point, maxN, "MotherShip", player);
 
+        //Need an algorithm to set enemy ship locations at random without overlaps
+
         ships = new Ship []{scout_One, scout_Two, cruiser, carrier, motherShip};
     }
 
@@ -144,7 +141,6 @@ public class GridBoard extends Activity implements OnTouchListener {
                 ivCell[x][y].setBackgroundResource(gridID);
             }
         }
-
         for(Ship s : ships) {
             for (int i = 0; i < s.getShipSize(); i++) {
                 ivCell[s.getBodyLocationPoints()[i].x][s.getBodyLocationPoints()[i].y].setBackgroundResource(s.getBodyResources()[i]);
@@ -263,6 +259,11 @@ public class GridBoard extends Activity implements OnTouchListener {
      * @return
      */
     private void checkIfOccupied(int row, int col){
+        // A.I. Attacking Check Cells
+        if(AIisAttacking) {
+            Log.i("Attack A.I.", "Checking Cell");
+            AIisAttacking = false;
+        }
         if(status == MotionStatus.DOWN) {
             for (int i = 0; i < occupiedCells.size(); i++) {
                 if (occupiedCells.get(i).x == row && occupiedCells.get(i).y == col) {
@@ -299,7 +300,43 @@ public class GridBoard extends Activity implements OnTouchListener {
              }
         }
     }
+    /**
+     *  A.I. Logic for Enemy
+     *  Loop is continued to check if A.I. has selected the grid cell before
+     *  if it has not then it performs the attack and adds it to its vector of
+     *  previous attacks. 
+      */
 
+    private void enemyAttack() {
+        // Loop until A.I. selects a cell it has not chosen before.
+        int counter = 0;
+        int myRow=0, myCol=0;
+        boolean selectionFound = false;
+
+        while (selectionFound == true || counter < aiAttacks.size()) {
+            // Select random row and col
+            Random newRow = new Random();
+            myRow = newRow.nextInt(maxN);
+            Random newCol = new Random();
+            myCol = newCol.nextInt(maxN);
+            String place = "" + myRow + myCol;
+            aiSelection[myRow][myCol].add(place);
+
+            while (counter < aiAttacks.size()) {
+                // Check if grid has been selected before
+                if (aiAttacks.get(counter).equals(aiSelection)) {
+                    selectionFound = true;
+                    counter = 0;
+                    break;
+                }
+                counter++;
+            }
+        }
+        aiAttacks.add(aiSelection[myRow][myCol]);
+        if(AIisAttacking) {
+            checkIfOccupied(myRow, myCol);
+        }
+    }
     /**
      * This is called from check if occupied on MOTION.DOWN
      * This returns the Ship object that was selected.
@@ -332,6 +369,9 @@ public class GridBoard extends Activity implements OnTouchListener {
     public boolean getHit(){return hit;}
     public void setHit(){hit = false;}
     public void setLockGrid(boolean lock){lockGrid = lock;}
+    public int getMarginSize(){return margin;}
+    public Ship[] getShips(){ return ships;}
+    public ArrayList<Point> getShipsPosition(){return occupiedCells;}
 
 
 }
