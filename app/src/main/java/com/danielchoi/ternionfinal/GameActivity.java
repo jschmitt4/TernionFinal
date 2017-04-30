@@ -365,7 +365,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             gamephase = GAMEPHASE.INTRO_PHASE; //Temp to reset game. It should be in the GAMEOVER_PHASE
             onBackPressed();
 
+        }else if (item.getItemId() == R.id.actionAI) {
+            //To call AI attack
+
         }
+
 
         return false;
     }
