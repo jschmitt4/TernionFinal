@@ -17,6 +17,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Created by Daniel on 4/8/2017.
@@ -38,6 +40,10 @@ public class GridBoard extends Activity implements OnTouchListener {
     private LinearLayout linBoardGame, linRow, searchRow;
     private ImageView[][] ivCell = new ImageView[maxN][maxN];
     private TextView shipTV;
+    private boolean AIisAttacking = false;
+    private boolean isNewCell = false;
+    Vector[][] aiSelection = new Vector[maxN][maxN]; // 2d Vector for A.I. to randomly choose hits on grid
+    Vector<Vector> aiAttacks = new Vector(); // Stores aiSelection Vector to track previous hits
 
 
     public GridBoard(Context context, int bID, boolean player, int cellCount){
@@ -253,6 +259,11 @@ public class GridBoard extends Activity implements OnTouchListener {
      * @return
      */
     private void checkIfOccupied(int row, int col){
+        // A.I. Attacking Check Cells
+        if(AIisAttacking) {
+            Log.i("Attack A.I.", "Checking Cell");
+            AIisAttacking = false;
+        }
         if(status == MotionStatus.DOWN) {
             for (int i = 0; i < occupiedCells.size(); i++) {
                 if (occupiedCells.get(i).x == row && occupiedCells.get(i).y == col) {
@@ -289,7 +300,43 @@ public class GridBoard extends Activity implements OnTouchListener {
              }
         }
     }
+    /**
+     *  A.I. Logic for Enemy
+     *  Loop is continued to check if A.I. has selected the grid cell before
+     *  if it has not then it performs the attack and adds it to its vector of
+     *  previous attacks. 
+      */
 
+    private void enemyAttack() {
+        // Loop until A.I. selects a cell it has not chosen before.
+        int counter = 0;
+        int myRow=0, myCol=0;
+        boolean selectionFound = false;
+
+        while (selectionFound == true || counter < aiAttacks.size()) {
+            // Select random row and col
+            Random newRow = new Random();
+            myRow = newRow.nextInt(maxN);
+            Random newCol = new Random();
+            myCol = newCol.nextInt(maxN);
+            String place = "" + myRow + myCol;
+            aiSelection[myRow][myCol].add(place);
+
+            while (counter < aiAttacks.size()) {
+                // Check if grid has been selected before
+                if (aiAttacks.get(counter).equals(aiSelection)) {
+                    selectionFound = true;
+                    counter = 0;
+                    break;
+                }
+                counter++;
+            }
+        }
+        aiAttacks.add(aiSelection[myRow][myCol]);
+        if(AIisAttacking) {
+            checkIfOccupied(myRow, myCol);
+        }
+    }
     /**
      * This is called from check if occupied on MOTION.DOWN
      * This returns the Ship object that was selected.
