@@ -79,7 +79,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
      * This loads the all the sounds that  is going to be used for this game
      */
     private void loadSounds(){
-
         soundsLoaded = new HashSet<>();
         AudioAttributes.Builder attrBuilder = new AudioAttributes.Builder();
         attrBuilder.setUsage(AudioAttributes.USAGE_GAME);
