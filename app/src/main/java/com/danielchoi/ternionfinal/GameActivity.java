@@ -51,7 +51,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         vb = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
     }
 
     @Override
@@ -141,9 +140,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 gamephase = GAMEPHASE.INTRO_PHASE;
                 introPhase();
                 break;
-
         }
-
     }
 
     /**
@@ -220,7 +217,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         fireButton.setOnClickListener(this);
         if(playerGrid == null)playerGrid = new GridBoard(this, R.id.playerGrid, true, cellCount);
         setDynamicButtonSize();
-
     }
 
     /**
@@ -230,11 +226,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         battleButton.setVisibility(View.GONE);
         shipName.setVisibility(View.GONE);
         if(playerGrid != null)playerGrid.hideGrid();
-
     }
 
     /**
-     * This is the player where we would pick the enemies coordinates to attack
+     * This is the player phase where we would pick the enemies coordinates to attack
      */
     private void playerPhase(){
         gamephase = GAMEPHASE.PLAYER_PHASE;
@@ -242,7 +237,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         fireButton.setVisibility(View.VISIBLE);
         //playerGP = new GamePhase(this, playerGrid.getShipsPosition(), playerGrid.getShips());
         if(enemyGrid == null)enemyGrid = new GridBoard(this, R.id.enemyGrid, false, cellCount);
-}
+    }
 
     @Override
     public void onClick(View view) {
@@ -252,15 +247,23 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             transition.reverseTransition(750);
             clearSetUpPhase();
             playerPhase();
-
-        }else if(view.getId() == R.id.fireIB){
+        } else if(view.getId() == R.id.fireIB) {
+            if (enemyGrid.touchRow != -1 && enemyGrid.touchCol != -1) {
+                transition.reverseTransition(750);
+                fireButton.setVisibility(View.GONE);
+                battleButton.setVisibility(View.GONE);
+                enemyGrid.hideGrid();
+                playerGrid.showGrid();
+                playerGrid.playerAttack(enemyGrid.touchRow, enemyGrid.touchCol);
+            } else {
+                Toast.makeText(this, "No Point Selected.", Toast.LENGTH_SHORT).show();
+            }
 
         }
-
     }
 
     /**
-     * This takes in the index valie of the soundID to play
+     * This takes in the index value of the soundID to play
      * @param i
      */
     private void playSounds(int i){
@@ -324,8 +327,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         lp2.height = height;
         lp2.width = width;
         ib2.setLayoutParams(lp2);
-
-
     }
 
     /**
@@ -370,8 +371,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             //To call AI attack
 
         }
-
-
         return false;
     }
 }
