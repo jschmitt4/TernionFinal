@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
@@ -45,6 +46,11 @@ public class GridBoard extends Activity implements OnTouchListener {
     Vector[][] aiSelection = new Vector[maxN][maxN]; // 2d Vector for A.I. to randomly choose hits on grid
     Vector<Vector> aiAttacks = new Vector(); // Stores aiSelection Vector to track previous hits
 
+    // Row/Col to be used for playerAttack().
+    // Initialized to -1 since first cell on grid is 0,0
+    int touchRow = -1;
+    int touchCol = -1;
+
 
     public GridBoard(Context context, int bID, boolean player, int cellCount){
         super();
@@ -57,7 +63,6 @@ public class GridBoard extends Activity implements OnTouchListener {
         createShips();
         setShips();
         status = MotionStatus.SETUP;
-
     }
 
     /**
@@ -104,7 +109,6 @@ public class GridBoard extends Activity implements OnTouchListener {
             }
             linBoardGame.addView(linRow, lpRow);
         }
-
     }
 
     /**
@@ -202,7 +206,7 @@ public class GridBoard extends Activity implements OnTouchListener {
                            //TODO: Need to try to handle this so that it only fires if ship ACTUALLY moves.
                            //Not priority but will help us with resources and allow us to use vibrate and sounds
                            //And so that it doesnt do unneccesary loops and clears.
-                           //vb.vibrate(10);
+                           // vb.vibrate(10);
                            Log.i("Clearing and reset","!");
                            occupiedCells.clear();
                            setShips();
@@ -213,9 +217,30 @@ public class GridBoard extends Activity implements OnTouchListener {
                     status = MotionStatus.UP;
                     break;
             }
-
         }
         return true;
+    }
+
+    /**
+     * Takes the user's grid point committed once fire button is clicked.
+     * Stores the user's selections in an array.
+     * Compares the user's selection to the occupied grid array.
+     * Handles user hits/misses visuals accordingly.
+     * @param r The row's cell the player is targeting.
+     * @param c the column's cell the player is targeting.
+     */
+    public void playerAttack(int r, int c) {
+        // Get view coords player clicked.
+        Log.i("player's target", "" + r + ", " + c);
+
+        // ignore if player has previously committed a fire on that cell
+        // place targeting image where player clicks
+        // commit to fire on fire button click
+        // store user selected coordinates
+        // check coordinates against occupied array
+        // if hit, place mushroom.png
+        // else miss, place crater.png
+
     }
 
     /**
@@ -231,7 +256,6 @@ public class GridBoard extends Activity implements OnTouchListener {
         View searchView;
         for (int row = 0; row < maxN; row++) {
             searchRow = (LinearLayout) linBoardGame.getChildAt(row); //Current row it is checking
-
             if (y > searchRow.getTop() && y < searchRow.getBottom()) {//If the Y coordinates are within the row Check which cell
                 for (int col = 0; col < maxN; col++) {
                     searchView = searchRow.getChildAt(col);    //Current View of the current searchRow
@@ -259,6 +283,10 @@ public class GridBoard extends Activity implements OnTouchListener {
      * @return
      */
     private void checkIfOccupied(int row, int col){
+        // Store found view's col/row for playerAttack.
+        touchCol = col;
+        touchRow = row;
+
         // A.I. Attacking Check Cells
         if(AIisAttacking) {
             Log.i("Attack A.I.", "Checking Cell");
@@ -267,14 +295,14 @@ public class GridBoard extends Activity implements OnTouchListener {
         if(status == MotionStatus.DOWN) {
             for (int i = 0; i < occupiedCells.size(); i++) {
                 if (occupiedCells.get(i).x == row && occupiedCells.get(i).y == col) {
-                    Log.i("OCCUPIED", ": TRUE");
+                    Log.i("OCCUPIED", "TRUE " + row + ", " + col);
                     Point p = new Point(row, col);
                     selectedShip = findWhichShip(p); //Touching View Updated
                     hit = true;
-                    return; // Exit loop when match found.
+                    break; // Exit loop when match found.
                 }
             }
-            if(selectedShip == null)Log.i("OCCUPIED", ": FALSE");
+            if(selectedShip == null)Log.i("OCCUPIED", "FALSE " + row + ", " + col);
 
         }else if(status == MotionStatus.MOVE){//MotionStatus.MOVE
              if(selectedShip != null){//Need to make sure none of the current ship parts will overlap another.
@@ -361,14 +389,6 @@ public class GridBoard extends Activity implements OnTouchListener {
         }
         return null;
     }
-
-    /**
-     * Player Attack!
-     */
-    public void playerAttack(){
-
-    }
-
 
     public void hideGrid(){linBoardGame.setVisibility(View.GONE);}
     public void showGrid(){

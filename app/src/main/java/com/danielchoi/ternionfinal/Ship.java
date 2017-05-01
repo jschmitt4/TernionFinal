@@ -3,7 +3,7 @@ package com.danielchoi.ternionfinal;
 import android.graphics.Point;
 
 /**
- * Created by cbfannin on 4/14/17.
+ * Created by charles and daniel on 4/14/17.
  */
 
 public class Ship {
@@ -13,7 +13,7 @@ public class Ship {
     private int[]   bodyResources;
     private String  shipName;
     public boolean  rotated = false;
-    public boolean  player; //true is player false is enemy
+    public boolean  player; //true is player; false is enemy
 
 
     public Ship(int shipSize, Point p, int maxGridSize, String shipName, boolean player){
