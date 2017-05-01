@@ -56,9 +56,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onResume() {
         super.onResume();
-        View decorView = getWindow().getDecorView();
-        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        decorView.setSystemUiVisibility(uiOptions);
         SharedPreferences phaseSP = getSharedPreferences("PHASE",Context.MODE_PRIVATE);
         String gamePhaseString = (phaseSP.getString("PHASE",GAMEPHASE.INTRO_PHASE.name()));
 
@@ -82,7 +79,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
      * This loads the all the sounds that  is going to be used for this game
      */
     private void loadSounds(){
-
         soundsLoaded = new HashSet<>();
         AudioAttributes.Builder attrBuilder = new AudioAttributes.Builder();
         attrBuilder.setUsage(AudioAttributes.USAGE_GAME);
@@ -190,11 +186,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void clearIntroPhase(){
         clearData();
-        if(layout != null)layout.setOnTouchListener(null);
-        if(alertView != null) {
-            alertView.clearAnimation();
-            alertView.setVisibility(View.INVISIBLE);
-        }
         findViewById(R.id.invasion).setVisibility(View.INVISIBLE);
     }
 
@@ -287,7 +278,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
      * clears all threads and sounds
      */
     private void clearData(){
-
         if (invasion != null) {
             invasion.cancel(true);
             invasion = null;
@@ -296,6 +286,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             soundPool.release();
             soundPool = null;
             soundsLoaded.clear();
+        }
+        if(layout != null)layout.setOnTouchListener(null);
+        if(alertView != null) {
+            alertView.clearAnimation();
+            alertView.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -349,7 +344,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         vb.vibrate(10);
-
         if (item.getItemId() == R.id.highScore) {
             gamephase = GAMEPHASE.INTRO_PHASE; //Temp to reset game. It should be in the GAMEOVER_PHASE
             if (playerGrid != null) {
@@ -371,6 +365,22 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             //To call AI attack
 
         }
+
         return false;
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        View decorView = getWindow().getDecorView();
+        if (hasFocus) {
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
     }
 }

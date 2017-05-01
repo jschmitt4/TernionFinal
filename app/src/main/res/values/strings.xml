@@ -8,11 +8,15 @@
     <string name="johnSchmitt">John Schmitt</string>
     <string name="johnSchmittInfo">Networking\nw/Mobile software technology</string>
     <string name="logoDescription">House Logo</string>
+
     <string name="artworkString">Artwork</string>
     <string name="spaceShipString">Space Ships: Skorpio\nCC-BY-SA 3.0 GPL 3.0</string>
     <string name="particlesString">Damage Art: HackCraft\nCC-BY 3.0 CC-BY-SA 3.0</string>
     <string name="layoutsString">Background Art: Daniel Choi</string>
 
+    <string name="audioString">Audio</string>
+    <string name="alarmString">Alert: Macro\nCC-BY 3.0</string>
+    <string name="ticksString">Click: qubodup\nCC0</string>
 
     <string name="defaultText">Default</string>
     <string name="congrats">Congrats!</string>

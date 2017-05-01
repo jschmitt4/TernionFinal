@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.media.AudioAttributes;
+import android.media.SoundPool;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
@@ -18,7 +20,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -31,20 +35,25 @@ public class GridBoard extends Activity implements OnTouchListener {
     private Point point;
     private Context context;
     final static int maxN = 8;
-    private MotionStatus status;
     private boolean moved, player, hit, lockGrid;
     private Ship ships[], selectedShip;
     private RelativeLayout gridContainer;
     private ArrayList<Point> occupiedCells;
-    private int boardID, sizeOfCell, margin, gridID;
-    private enum MotionStatus{SETUP, DOWN, MOVE, UP}
+    private int boardID, sizeOfCell, margin, gridID, soundID;
+    private enum MotionStatus{DOWN, MOVE, UP}
+    private MotionStatus status;
+    private enum GamePhaseStatus{SETUP, GAMEPHASE}
+    private GamePhaseStatus gpStatus;
     private LinearLayout linBoardGame, linRow, searchRow;
     private ImageView[][] ivCell = new ImageView[maxN][maxN];
     private TextView shipTV;
+    private View lastView, newView;
     private boolean AIisAttacking = false;
     private boolean isNewCell = false;
     Vector[][] aiSelection = new Vector[maxN][maxN]; // 2d Vector for A.I. to randomly choose hits on grid
     Vector<Vector> aiAttacks = new Vector(); // Stores aiSelection Vector to track previous hits
+    SoundPool soundPool;
+    private Set<Integer> soundsLoaded;
 
     // Row/Col to be used for playerAttack().
     // Initialized to -1 since first cell on grid is 0,0
@@ -62,7 +71,8 @@ public class GridBoard extends Activity implements OnTouchListener {
         setBoard();
         createShips();
         setShips();
-        status = MotionStatus.SETUP;
+        loadSounds();
+
     }
 
     /**
@@ -201,12 +211,15 @@ public class GridBoard extends Activity implements OnTouchListener {
                case MotionEvent.ACTION_MOVE:
                    status = MotionStatus.MOVE;
                    if(!lockGrid){
+                       if(newView != null) lastView = newView;
                        findViewHelper(touchX, touchY);
-                       if(selectedShip != null) {
+
+                       if(selectedShip != null && newView != lastView) {
                            //TODO: Need to try to handle this so that it only fires if ship ACTUALLY moves.
                            //Not priority but will help us with resources and allow us to use vibrate and sounds
                            //And so that it doesnt do unneccesary loops and clears.
-                           // vb.vibrate(10);
+                           vb.vibrate(10);
+                           playClick(soundID);
                            Log.i("Clearing and reset","!");
                            occupiedCells.clear();
                            setShips();
@@ -261,6 +274,7 @@ public class GridBoard extends Activity implements OnTouchListener {
                     searchView = searchRow.getChildAt(col);    //Current View of the current searchRow
                     if (x > searchView.getLeft() && x < searchView.getRight()) {//If the x coordinates are within the view, View found!
                         if(searchView == ivCell[row][col]){ //View found
+                            newView = searchView;
                             checkIfOccupied(row, col);
                         }//if
                     }//if
@@ -388,6 +402,35 @@ public class GridBoard extends Activity implements OnTouchListener {
             }
         }
         return null;
+    }
+
+    private void loadSounds(){
+
+        AudioAttributes.Builder attrBuilder = new AudioAttributes.Builder();
+        attrBuilder.setUsage(AudioAttributes.USAGE_GAME);
+
+        soundsLoaded = new HashSet<>();
+        final SoundPool.Builder spBuilder = new SoundPool.Builder();
+        spBuilder.setAudioAttributes(attrBuilder.build());
+        spBuilder.setMaxStreams(2);
+        soundPool = spBuilder.build();
+        soundID = soundPool.load(context, R.raw.click, 1);
+        soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+                if (status == 0) {
+                    soundsLoaded.add(sampleId);
+                } else {
+                    Log.i("SOUND", "Error cannot load sound status = " + status);
+                }
+            }
+        });
+
+    }
+
+    private void playClick(int id){
+        Log.i("Play AUDIO: ","**********");
+        if(soundsLoaded.contains(id)) soundPool.play(id, .5f, .5f, 0, 0, .2f);
     }
 
     public void hideGrid(){linBoardGame.setVisibility(View.GONE);}
