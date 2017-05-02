@@ -51,15 +51,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         vb = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        View decorView = getWindow().getDecorView();
-        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        decorView.setSystemUiVisibility(uiOptions);
         SharedPreferences phaseSP = getSharedPreferences("PHASE",Context.MODE_PRIVATE);
         String gamePhaseString = (phaseSP.getString("PHASE",GAMEPHASE.INTRO_PHASE.name()));
 
@@ -83,7 +79,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
      * This loads the all the sounds that  is going to be used for this game
      */
     private void loadSounds(){
-
         soundsLoaded = new HashSet<>();
         AudioAttributes.Builder attrBuilder = new AudioAttributes.Builder();
         attrBuilder.setUsage(AudioAttributes.USAGE_GAME);
@@ -141,9 +136,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 gamephase = GAMEPHASE.INTRO_PHASE;
                 introPhase();
                 break;
-
         }
-
     }
 
     /**
@@ -193,11 +186,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void clearIntroPhase(){
         clearData();
-        if(layout != null)layout.setOnTouchListener(null);
-        if(alertView != null) {
-            alertView.clearAnimation();
-            alertView.setVisibility(View.INVISIBLE);
-        }
         findViewById(R.id.invasion).setVisibility(View.INVISIBLE);
     }
 
@@ -220,7 +208,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         fireButton.setOnClickListener(this);
         if(playerGrid == null)playerGrid = new GridBoard(this, R.id.playerGrid, true, cellCount);
         setDynamicButtonSize();
-
     }
 
     /**
@@ -230,11 +217,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         battleButton.setVisibility(View.GONE);
         shipName.setVisibility(View.GONE);
         if(playerGrid != null)playerGrid.hideGrid();
-
     }
 
     /**
-     * This is the player where we would pick the enemies coordinates to attack
+     * This is the player phase where we would pick the enemies coordinates to attack
      */
     private void playerPhase(){
         gamephase = GAMEPHASE.PLAYER_PHASE;
@@ -242,7 +228,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         fireButton.setVisibility(View.VISIBLE);
         //playerGP = new GamePhase(this, playerGrid.getShipsPosition(), playerGrid.getShips());
         if(enemyGrid == null)enemyGrid = new GridBoard(this, R.id.enemyGrid, false, cellCount);
-}
+    }
 
     @Override
     public void onClick(View view) {
@@ -252,15 +238,23 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             transition.reverseTransition(750);
             clearSetUpPhase();
             playerPhase();
-
-        }else if(view.getId() == R.id.fireIB){
+        } else if(view.getId() == R.id.fireIB) {
+            if (enemyGrid.touchRow != -1 && enemyGrid.touchCol != -1) {
+                transition.reverseTransition(750);
+                fireButton.setVisibility(View.GONE);
+                battleButton.setVisibility(View.GONE);
+                enemyGrid.hideGrid();
+                playerGrid.showGrid();
+                playerGrid.playerAttack(enemyGrid.touchRow, enemyGrid.touchCol);
+            } else {
+                Toast.makeText(this, "No Point Selected.", Toast.LENGTH_SHORT).show();
+            }
 
         }
-
     }
 
     /**
-     * This takes in the index valie of the soundID to play
+     * This takes in the index value of the soundID to play
      * @param i
      */
     private void playSounds(int i){
@@ -284,7 +278,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
      * clears all threads and sounds
      */
     private void clearData(){
-
         if (invasion != null) {
             invasion.cancel(true);
             invasion = null;
@@ -293,6 +286,11 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             soundPool.release();
             soundPool = null;
             soundsLoaded.clear();
+        }
+        if(layout != null)layout.setOnTouchListener(null);
+        if(alertView != null) {
+            alertView.clearAnimation();
+            alertView.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -324,8 +322,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         lp2.height = height;
         lp2.width = width;
         ib2.setLayoutParams(lp2);
-
-
     }
 
     /**
@@ -348,7 +344,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         vb.vibrate(10);
-
         if (item.getItemId() == R.id.highScore) {
             gamephase = GAMEPHASE.INTRO_PHASE; //Temp to reset game. It should be in the GAMEOVER_PHASE
             if (playerGrid != null) {
@@ -366,8 +361,26 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             gamephase = GAMEPHASE.INTRO_PHASE; //Temp to reset game. It should be in the GAMEOVER_PHASE
             onBackPressed();
 
+        }else if (item.getItemId() == R.id.actionAI) {
+            //To call AI attack
+
         }
 
         return false;
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        View decorView = getWindow().getDecorView();
+        if (hasFocus) {
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
     }
 }

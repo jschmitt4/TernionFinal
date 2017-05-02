@@ -14,5 +14,6 @@ public class AboutActivity extends AppCompatActivity {
         setContentView(R.layout.activity_about);
         ((TextView) findViewById(R.id.developers)).setTypeface(Typeface.createFromAsset(getAssets(),  "fonts/britanicbold.TTF"));
         ((TextView) findViewById(R.id.artWorkTV)).setTypeface(Typeface.createFromAsset(getAssets(),  "fonts/britanicbold.TTF"));
+        ((TextView) findViewById(R.id.audioTV)).setTypeface(Typeface.createFromAsset(getAssets(),  "fonts/britanicbold.TTF"));
     }
 }
