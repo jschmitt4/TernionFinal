@@ -85,10 +85,13 @@ public class GridBoard extends Activity implements OnTouchListener {
         sizeOfCell = Math.round(ScreenWidth() / (maxN + (1)));
         occupiedCells = new ArrayList<>();
         moved = false;
-        // setHit(false); This doesn't seem to be necessary now that there is a setter/getter.
+        // hit = false; This doesn't seem to be necessary now that there is a setter/getter.
         gridID = R.drawable.grid;
-        if(!player)lockGrid = true;
-        else lockGrid = false;
+        if(!player) {
+            setLockGrid(true);
+        } else {
+            setLockGrid(false);
+        }
     }
 
     /**
@@ -210,7 +213,6 @@ public class GridBoard extends Activity implements OnTouchListener {
                    if(!lockGrid){
                        if(newView != null) lastView = newView;
                        findViewHelper(touchX, touchY);
-
                        if(selectedShip != null && newView != lastView) {
                            //TODO: Need to try to handle this so that it only fires if ship ACTUALLY moves.
                            //Not priority but will help us with resources and allow us to use vibrate and sounds
@@ -467,6 +469,7 @@ public class GridBoard extends Activity implements OnTouchListener {
     public boolean getHit(){return hit;}
     public void setHit(boolean h){hit = h;}
     public void setLockGrid(boolean lock){lockGrid = lock;}
+    public boolean getLockGrid(){return lockGrid;}
     public int getMarginSize(){return margin;}
     public Ship[] getShips(){ return ships;}
     public ArrayList<Point> getShipsPosition(){return occupiedCells;}
