@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
-import android.graphics.drawable.TransitionDrawable;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
@@ -87,11 +86,10 @@ public class GridBoard extends Activity implements OnTouchListener {
         sizeOfCell = Math.round(ScreenWidth() / (maxN + (1)));
         occupiedCells = new ArrayList<>();
         moved = false;
-        hit = false;
+        // setHit(false); This doesn't seem to be necessary now that there is a setter/getter.
         gridID = R.drawable.grid;
         if(!player)lockGrid = true;
         else lockGrid = false;
-
     }
 
     /**
@@ -246,14 +244,24 @@ public class GridBoard extends Activity implements OnTouchListener {
         // Get view coords player clicked.
         Log.i("player's target", "" + r + ", " + c);
 
-        // ignore if player has previously committed a fire on that cell
-        // place targeting image where player clicks
-        // commit to fire on fire button click
-        // store user selected coordinates
-        // check coordinates against occupied array
-        // if hit, place mushroom.png
-        // else miss, place crater.png
+        // store committed attack coordinates in array list of Points
+        Point playerAttacks = new Point(r,c);
 
+        // TODO ignore touch if player has previously committed a fire on that cell
+
+        // Hit is set when coords are passed to checkIfOccupied via findViewHelper.
+        // i.e. By the time player clicks the "Fire" button, hit boolean has already been set.
+        // If hit, place the mushroom image; else miss place crater image.
+        if (getHit()){
+            ivCell[touchRow][touchCol].setBackgroundResource(R.drawable.mushroom);
+            Log.i("playerAttack()", "Hit :)");
+        } else {
+            ivCell[touchRow][touchCol].setBackgroundResource(R.drawable.crater);
+            Log.i("playerAttack()", "Miss :(");
+        }
+
+        // TODO prevent user from being able to move ships after battle begins
+        // TODO transition back to enemy grid
     }
 
     /**
@@ -297,7 +305,9 @@ public class GridBoard extends Activity implements OnTouchListener {
      * @return
      */
     private void checkIfOccupied(int row, int col){
-        // Store found view's col/row for playerAttack.
+        // Update user selected coords each time a view on the grid is found.
+        // To be used for playerAttack().
+        // This seems to be the only place I can put this without causing app to crash.
         touchCol = col;
         touchRow = row;
 
@@ -312,11 +322,20 @@ public class GridBoard extends Activity implements OnTouchListener {
                     Log.i("OCCUPIED", "TRUE " + row + ", " + col);
                     Point p = new Point(row, col);
                     selectedShip = findWhichShip(p); //Touching View Updated
-                    hit = true;
+                    setHit(true);
+                    Log.i("true getHit", "" + getHit());
                     break; // Exit loop when match found.
                 }
             }
-            if(selectedShip == null)Log.i("OCCUPIED", "FALSE " + row + ", " + col);
+            if(selectedShip == null) {
+                setHit(false);
+                Log.i("OCCUPIED", "FALSE " + row + ", " + col);
+                Log.i("false getHit", "" + getHit());
+            }
+
+            // TODO Set target image in cell that the user clicks.
+            // If the user hasn't already clicked or hit/miss that cell.
+            ivCell[touchRow][touchCol].setBackgroundResource(R.drawable.target);
 
         }else if(status == MotionStatus.MOVE){//MotionStatus.MOVE
              if(selectedShip != null){//Need to make sure none of the current ship parts will overlap another.
@@ -342,13 +361,13 @@ public class GridBoard extends Activity implements OnTouchListener {
              }
         }
     }
+
     /**
      *  A.I. Logic for Enemy
      *  Loop is continued to check if A.I. has selected the grid cell before
      *  if it has not then it performs the attack and adds it to its vector of
      *  previous attacks. 
       */
-
     private void enemyAttack() {
         // Loop until A.I. selects a cell it has not chosen before.
         int counter = 0;
@@ -379,6 +398,7 @@ public class GridBoard extends Activity implements OnTouchListener {
             checkIfOccupied(myRow, myCol);
         }
     }
+
     /**
      * This is called from check if occupied on MOTION.DOWN
      * This returns the Ship object that was selected.
@@ -414,7 +434,7 @@ public class GridBoard extends Activity implements OnTouchListener {
         spBuilder.setAudioAttributes(attrBuilder.build());
         spBuilder.setMaxStreams(2);
         soundPool = spBuilder.build();
-        soundID = soundPool.load(context, R.raw.click, 1);
+//        soundID = soundPool.load(context, R.raw.click, 1);
         soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
             @Override
             public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
@@ -425,7 +445,6 @@ public class GridBoard extends Activity implements OnTouchListener {
                 }
             }
         });
-
     }
 
     private void playClick(int id){
@@ -438,11 +457,9 @@ public class GridBoard extends Activity implements OnTouchListener {
         linBoardGame.setVisibility(View.VISIBLE);
     }
     public boolean getHit(){return hit;}
-    public void setHit(){hit = false;}
+    public void setHit(boolean h){hit = h;}
     public void setLockGrid(boolean lock){lockGrid = lock;}
     public int getMarginSize(){return margin;}
     public Ship[] getShips(){ return ships;}
     public ArrayList<Point> getShipsPosition(){return occupiedCells;}
-
-
 }
