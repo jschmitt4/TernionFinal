@@ -27,6 +27,7 @@ import android.widget.Toast;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.Timer;
 
 public class GameActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener{
     // Variables
@@ -263,10 +264,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             if (enemyGrid.touchRow != -1 && enemyGrid.touchCol != -1) {
                 transition.reverseTransition(750);
                 fireButton.setVisibility(View.GONE);
+
+                battleButton.setVisibility(View.GONE);
+                enemyGrid.playerAttack(enemyGrid.touchRow, enemyGrid.touchCol);
+
                 enemyGrid.hideGrid();
                 playerGrid.showGrid();
-                playerGrid.playerAttack(enemyGrid.touchRow, enemyGrid.touchCol);
             } else {
+              
                 Toast.makeText(this, "No Point Selected.", Toast.LENGTH_SHORT).show();
             }
         }
