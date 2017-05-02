@@ -62,7 +62,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         loadSounds();
         defaultGlobalVariables();
         introPhase();
-        //enterPhase(gamePhaseString);
+       // enterPhase(gamePhaseString);
     }
 
     @Override
@@ -120,14 +120,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 //Bad code below, but without it, it is causing issues
                 //Need to go through and clear and set phases better
                 //It gives a grid alignment issue
-                introPhase();
-                clearIntroPhase();
-                setUpPhase();
-                clearSetUpPhase();
+                //introPhase();
+                //clearIntroPhase();
+                //setUpPhase();
+                //clearSetUpPhase();
                 playerPhase();
                 break;
             case "ENEMY_PHASE":
                 gamephase = GAMEPHASE.ENEMY_PHASE;
+                //introPhase();
+                //clearIntroPhase();
+                //setUpPhase();
+                //clearSetUpPhase();
+                enemyPhase();
                 break;
             case "GAMEOVER_PHASE":
                 gamephase = GAMEPHASE.GAMEOVER_PHASE;
@@ -226,8 +231,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         gamephase = GAMEPHASE.PLAYER_PHASE;
         playersTurn = true;
         fireButton.setVisibility(View.VISIBLE);
-        //playerGP = new GamePhase(this, playerGrid.getShipsPosition(), playerGrid.getShips());
+        playerGP = new GamePhase(this, playerGrid.getShipsPosition(), playerGrid.getShips());
         if(enemyGrid == null)enemyGrid = new GridBoard(this, R.id.enemyGrid, false, cellCount);
+    }
+
+    /**
+     * This is the enemy phase that selects rand player coordinates to attack
+     */
+    private void enemyPhase(){
+        gamephase = GAMEPHASE.ENEMY_PHASE;
+        playersTurn = false;
+        battleButton.setVisibility(View.VISIBLE);
+        enemyGP = new GamePhase(this, enemyGrid.getShipsPosition(), enemyGrid.getShips());
+        playerGrid.enemyAttack();
     }
 
     @Override
@@ -236,20 +252,23 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
         if(view.getId()== R.id.battleIB){
             transition.reverseTransition(750);
+            battleButton.setVisibility(View.GONE);
             clearSetUpPhase();
             playerPhase();
+            enemyGrid.showGrid();
+            playerGrid.hideGrid();
+
         } else if(view.getId() == R.id.fireIB) {
+            enemyPhase();
             if (enemyGrid.touchRow != -1 && enemyGrid.touchCol != -1) {
                 transition.reverseTransition(750);
                 fireButton.setVisibility(View.GONE);
-                battleButton.setVisibility(View.GONE);
                 enemyGrid.hideGrid();
                 playerGrid.showGrid();
                 playerGrid.playerAttack(enemyGrid.touchRow, enemyGrid.touchCol);
             } else {
                 Toast.makeText(this, "No Point Selected.", Toast.LENGTH_SHORT).show();
             }
-
         }
     }
 
