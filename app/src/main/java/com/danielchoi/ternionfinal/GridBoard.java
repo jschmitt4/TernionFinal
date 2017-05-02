@@ -49,8 +49,7 @@ public class GridBoard extends Activity implements OnTouchListener {
     private View lastView, newView;
     private boolean AIisAttacking = false;
     private boolean isNewCell = false;
-    Vector[][] aiSelection = new Vector[maxN][maxN]; // 2d Vector for A.I. to randomly choose hits on grid
-    Vector<Vector> aiAttacks = new Vector(); // Stores aiSelection Vector to track previous hits
+    private Vector<String> aiAttacks = new Vector(); // Stores A.I. attacks in Vector to track previous hits
     SoundPool soundPool;
     private Set<Integer> soundsLoaded;
 
@@ -368,24 +367,26 @@ public class GridBoard extends Activity implements OnTouchListener {
      *  if it has not then it performs the attack and adds it to its vector of
      *  previous attacks. 
       */
+
     private void enemyAttack() {
         // Loop until A.I. selects a cell it has not chosen before.
         int counter = 0;
         int myRow=0, myCol=0;
         boolean selectionFound = false;
-
+        String aiSelectedHit = "Empty";
         while (selectionFound == true || counter < aiAttacks.size()) {
+            selectionFound = false;
             // Select random row and col
             Random newRow = new Random();
             myRow = newRow.nextInt(maxN);
             Random newCol = new Random();
             myCol = newCol.nextInt(maxN);
-            String place = "" + myRow + myCol;
-            aiSelection[myRow][myCol].add(place);
+            Log.i("_-_-_-_", "aiRandomHit call " + counter);
+            aiSelectedHit = myRow + ", " + myCol;
 
             while (counter < aiAttacks.size()) {
                 // Check if grid has been selected before
-                if (aiAttacks.get(counter).equals(aiSelection)) {
+                if (aiAttacks.get(counter).equals(aiSelectedHit)) {
                     selectionFound = true;
                     counter = 0;
                     break;
@@ -393,10 +394,14 @@ public class GridBoard extends Activity implements OnTouchListener {
                 counter++;
             }
         }
-        aiAttacks.add(aiSelection[myRow][myCol]);
+       aiAttacks.add(aiSelectedHit);
+        for(int i=0; i<aiAttacks.size(); i++){
+            Log.i("AI hits coordinate: ", aiAttacks.get(i));
+        }
         if(AIisAttacking) {
             checkIfOccupied(myRow, myCol);
         }
+        Log.i("Enemy AI is Attacking","---------");
     }
 
     /**
