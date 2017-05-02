@@ -70,7 +70,6 @@ public class GridBoard extends Activity implements OnTouchListener {
         createShips();
         setShips();
         loadSounds();
-
     }
 
     /**
@@ -210,7 +209,7 @@ public class GridBoard extends Activity implements OnTouchListener {
                     break;
                case MotionEvent.ACTION_MOVE:
                    status = MotionStatus.MOVE;
-                   if(!lockGrid){
+                   if(!getLockGrid()){
                        if(newView != null) lastView = newView;
                        findViewHelper(touchX, touchY);
                        if(selectedShip != null && newView != lastView) {
@@ -251,17 +250,17 @@ public class GridBoard extends Activity implements OnTouchListener {
         // TODO ignore touch if player has previously committed a fire on that cell
 
         // Hit is set when coords are passed to checkIfOccupied via findViewHelper.
-        // i.e. By the time player clicks the "Fire" button, hit boolean has already been set.
-        // If hit, place the mushroom image; else miss place crater image.
+        // i.e. By the time player clicks the "Fire" button to call this method,
+        // the hit boolean has already been set.
+        // If hit, place the mushroom image; else miss and place crater image.
         if (getHit()){
-            ivCell[touchRow][touchCol].setBackgroundResource(R.drawable.mushroom);
+            ivCell[touchRow][touchCol].setImageResource(R.drawable.mushroom);
             Log.i("playerAttack()", "Hit :)");
         } else {
-            ivCell[touchRow][touchCol].setBackgroundResource(R.drawable.crater);
+            ivCell[touchRow][touchCol].setImageResource(R.drawable.crater);
             Log.i("playerAttack()", "Miss :(");
         }
 
-        // TODO prevent user from being able to move ships after battle begins
         // TODO transition back to enemy grid
 
         // Reset player's selection.
@@ -339,8 +338,11 @@ public class GridBoard extends Activity implements OnTouchListener {
             }
 
             // TODO Set target image in cell that the user clicks.
+            // TODO Don't place them when user is adjusting ships.
             // If the user hasn't already clicked or hit/miss that cell.
-            ivCell[touchRow][touchCol].setBackgroundResource(R.drawable.target);
+            if(!player) {
+                ivCell[touchRow][touchCol].setImageResource(R.drawable.target);
+            }
 
         }else if(status == MotionStatus.MOVE){//MotionStatus.MOVE
              if(selectedShip != null){//Need to make sure none of the current ship parts will overlap another.
