@@ -258,20 +258,15 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             playerPhase();
             enemyGrid.showGrid();
             playerGrid.hideGrid();
-
         } else if(view.getId() == R.id.fireIB) {
-            enemyPhase();
             if (enemyGrid.touchRow != -1 && enemyGrid.touchCol != -1) {
+                enemyPhase();
                 transition.reverseTransition(750);
                 fireButton.setVisibility(View.GONE);
-
-                battleButton.setVisibility(View.GONE);
                 enemyGrid.playerAttack(enemyGrid.touchRow, enemyGrid.touchCol);
-
                 enemyGrid.hideGrid();
                 playerGrid.showGrid();
             } else {
-              
                 Toast.makeText(this, "No Point Selected.", Toast.LENGTH_SHORT).show();
             }
         }

@@ -261,6 +261,10 @@ public class GridBoard extends Activity implements OnTouchListener {
 
         // TODO prevent user from being able to move ships after battle begins
         // TODO transition back to enemy grid
+
+        // Reset player's selection.
+        touchRow = -1;
+        touchCol = -1;
     }
 
     /**
@@ -367,8 +371,7 @@ public class GridBoard extends Activity implements OnTouchListener {
      *  if it has not then it performs the attack and adds it to its vector of
      *  previous attacks. 
       */
-
-    private void enemyAttack() {
+    public void enemyAttack() {
         // Loop until A.I. selects a cell it has not chosen before.
         int counter = 0;
         int myRow=0, myCol=0;
