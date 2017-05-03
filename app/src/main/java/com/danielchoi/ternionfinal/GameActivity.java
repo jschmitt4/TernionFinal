@@ -38,6 +38,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private boolean playersTurn;
     private Set<Integer> soundsLoaded;
     private TransitionDrawable transition;
+
     private enum GAMEPHASE{INTRO_PHASE, SETUP_PHASE, PLAYER_PHASE, ENEMY_PHASE, GAMEOVER_PHASE}
     public GAMEPHASE gamephase;
     public GamePhase playerGP, enemyGP;
@@ -258,6 +259,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             playerPhase();
             enemyGrid.showGrid();
             playerGrid.hideGrid();
+            playerGrid.setLockGrid(true);
         } else if(view.getId() == R.id.fireIB) {
             if (enemyGrid.touchRow != -1 && enemyGrid.touchCol != -1) {
                 enemyPhase();

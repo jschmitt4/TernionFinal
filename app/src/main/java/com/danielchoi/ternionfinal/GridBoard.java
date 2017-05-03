@@ -58,7 +58,6 @@ public class GridBoard extends Activity implements OnTouchListener {
     int touchRow = -1;
     int touchCol = -1;
 
-
     public GridBoard(Context context, int bID, boolean player, int cellCount){
         super();
         this.context = context;
@@ -86,10 +85,11 @@ public class GridBoard extends Activity implements OnTouchListener {
         moved = false;
         // hit = false; This doesn't seem to be necessary now that there is a setter/getter.
         gridID = R.drawable.grid;
-        if(!player) {
+
+        // Create GameActivity class to get status of Battle.
+        // Use GameActivity class with player status to initialize grid lock.
+        if(!player || getLockGrid()) {
             setLockGrid(true);
-        } else {
-            setLockGrid(false);
         }
     }
 
@@ -207,22 +207,22 @@ public class GridBoard extends Activity implements OnTouchListener {
                         shipTV.setText(selectedShip.getShipName());
                     }
                     break;
-               case MotionEvent.ACTION_MOVE:
-                   status = MotionStatus.MOVE;
-                   if(!getLockGrid()){
-                       if(newView != null) lastView = newView;
-                       findViewHelper(touchX, touchY);
-                       if(selectedShip != null && newView != lastView) {
-                           //TODO: Need to try to handle this so that it only fires if ship ACTUALLY moves.
-                           //Not priority but will help us with resources and allow us to use vibrate and sounds
-                           //And so that it doesnt do unneccesary loops and clears.
-                           vb.vibrate(10);
-                           playClick(soundID);
-                           Log.i("Clearing and reset","!");
-                           occupiedCells.clear();
-                           setShips();
-                       }
-                   }
+                case MotionEvent.ACTION_MOVE:
+                    status = MotionStatus.MOVE;
+                    if(!getLockGrid()){
+                        if(newView != null) lastView = newView;
+                        findViewHelper(touchX, touchY);
+                        if(selectedShip != null && newView != lastView) {
+                            //TODO: Need to try to handle this so that it only fires if ship ACTUALLY moves.
+                            //Not priority but will help us with resources and allow us to use vibrate and sounds
+                            //And so that it doesn't do unnecessary loops and clears.
+                            vb.vibrate(10);
+                            playClick(soundID);
+                            Log.i("Clearing and reset","!");
+                            occupiedCells.clear();
+                            setShips();
+                        }
+                    }
                     break;
                 case MotionEvent.ACTION_UP:
                     status = MotionStatus.UP;
@@ -338,7 +338,6 @@ public class GridBoard extends Activity implements OnTouchListener {
             }
 
             // TODO Set target image in cell that the user clicks.
-            // TODO Don't place them when user is adjusting ships.
             // If the user hasn't already clicked or hit/miss that cell.
             if(!player) {
                 ivCell[touchRow][touchCol].setImageResource(R.drawable.target);
