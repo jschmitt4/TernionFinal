@@ -437,7 +437,7 @@ public class GridBoard extends Activity implements OnTouchListener {
         spBuilder.setAudioAttributes(attrBuilder.build());
         spBuilder.setMaxStreams(2);
         soundPool = spBuilder.build();
-        //        soundID = soundPool.load(context, R.raw.click, 1);
+        soundID = soundPool.load(context, R.raw.click, 1);
         soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
             @Override
             public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
