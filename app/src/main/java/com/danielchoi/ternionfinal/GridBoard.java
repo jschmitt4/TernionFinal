@@ -86,8 +86,10 @@ public class GridBoard extends Activity implements OnTouchListener {
         // hit = false; This doesn't seem to be necessary now that there is a setter/getter.
         gridID = R.drawable.grid;
 
-        // Create GameActivity class to get status of Battle.
-        // Use GameActivity class with player status to initialize grid lock.
+        // Determine if grid should be locked or not.
+        // Grid Locked if this is NOT the player
+        // OR
+        // If the Battle button in GameActivity has been clicked.
         if(!player || getLockGrid()) {
             setLockGrid(true);
         } else {

@@ -90,15 +90,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         spBuilder.setMaxStreams(4);
         soundPool = spBuilder.build();
         soundID = new int[]{soundPool.load(this, R.raw.alarm, 1)};
-
     }
 
     /**
      * This method will be used to load up previous gamestates
      */
-    private void loadSaveState(){
-
-    }
+    private void loadSaveState(){}
 
     /**
      * This directs the game to the proper phase when returning to the game
@@ -182,7 +179,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 return false;
             }
         });
-
     }
 
     /**
@@ -292,7 +288,6 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
-
     }
 
     /**
@@ -384,9 +379,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
         }else if (item.getItemId() == R.id.actionAI) {
             //To call AI attack
-
         }
-
         return false;
     }
 
