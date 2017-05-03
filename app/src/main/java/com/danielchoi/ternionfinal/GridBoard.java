@@ -90,6 +90,8 @@ public class GridBoard extends Activity implements OnTouchListener {
         // Use GameActivity class with player status to initialize grid lock.
         if(!player || getLockGrid()) {
             setLockGrid(true);
+        } else {
+            setLockGrid(false);
         }
     }
 
