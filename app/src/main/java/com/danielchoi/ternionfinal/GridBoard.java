@@ -253,6 +253,7 @@ public class GridBoard extends Activity implements OnTouchListener {
         // If hit, place the mushroom image; else miss place crater image.
         if (getHit()){
             ivCell[touchRow][touchCol].setBackgroundResource(R.drawable.mushroom);
+
             Log.i("playerAttack()", "Hit :)");
         } else {
             ivCell[touchRow][touchCol].setBackgroundResource(R.drawable.crater);
